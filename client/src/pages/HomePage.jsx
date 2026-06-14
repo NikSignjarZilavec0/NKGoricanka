@@ -7,22 +7,11 @@ import MatchCard from '../components/MatchCard.jsx';
 import Loader from '../components/Loader.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
-import {
-  IconNewspaper, IconUsers, IconCalendar, IconShield, IconArrowRight,
-} from '../components/icons.jsx';
-
-const QUICK_LINKS = [
-  { to: '/news', Icon: IconNewspaper, title: 'Novice', text: 'Zadnje iz kluba' },
-  { to: '/players', Icon: IconUsers, title: 'Kader', text: 'Naši igralci' },
-  { to: '/matches', Icon: IconCalendar, title: 'Tekme', text: 'Razpored & rezultati' },
-  { to: '/about', Icon: IconShield, title: 'O klubu', text: 'Zgodovina & kontakt' },
-];
 
 export default function HomePage() {
   const { club } = useClub();
   const [news, setNews] = useState([]);
-  const [upcoming, setUpcoming] = useState([]);
-  const [recent, setRecent] = useState([]);
+  const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useDocumentTitle('NK Goričanka — uradna spletna stran');
@@ -30,78 +19,35 @@ export default function HomePage() {
   useEffect(() => {
     Promise.all([
       newsApi.listPublished().catch(() => []),
-      matchesApi.list('upcoming').catch(() => []),
       matchesApi.list('finished').catch(() => []),
+      matchesApi.list('upcoming').catch(() => []),
     ])
-      .then(([n, up, fin]) => {
+      .then(([n, finished, upcoming]) => {
         setNews(n.slice(0, 3));
-        setUpcoming(up.slice(0, 1));
-        setRecent(fin.slice(0, 1));
+        // "Zadnje tekme": recent results; fall back to upcoming if none played yet.
+        setMatches((finished.length ? finished : upcoming).slice(0, 3));
       })
       .finally(() => setLoading(false));
   }, []);
 
   return (
     <>
-      {/* Hero */}
+      {/* Hero — text only */}
       <section className="hero">
         <div className="hero__overlay" />
         <div className="container hero__content">
-          <span className="hero__eyebrow">Nogometni klub · Goričko, Prekmurje</span>
+          <span className="hero__eyebrow">Nogometni klub Goričanka</span>
           <h1 className="hero__title">
             {club?.name || 'NK Goričanka'}
-            <span className="hero__title-accent">Ponos našega kraja</span>
+            <span className="hero__title-accent">Uradna spletna stran</span>
           </h1>
-          <p className="hero__lead">
-            Spremljajte novice, igralski kader, razpored tekem in rezultate našega kluba.
-            Skupaj nosimo rdečo.
-          </p>
-          <div className="hero__cta">
-            <Link to="/matches" className="btn btn--light">Razpored tekem<IconArrowRight /></Link>
-            <Link to="/players" className="btn btn--ghost">Spoznaj ekipo</Link>
-          </div>
         </div>
-      </section>
-
-      {/* Quick links */}
-      <section className="container quicklinks">
-        {QUICK_LINKS.map(({ to, Icon, title, text }) => (
-          <Link key={to} to={to} className="quicklink card">
-            <span className="quicklink__icon"><Icon /></span>
-            <div>
-              <strong>{title}</strong>
-              <small>{text}</small>
-            </div>
-          </Link>
-        ))}
       </section>
 
       {loading ? (
         <Loader full />
       ) : (
         <>
-          {/* Matches strip */}
-          {(upcoming.length > 0 || recent.length > 0) && (
-            <section className="section section--tight">
-              <div className="container">
-                <div className="home-matches">
-                  {recent[0] && (
-                    <div>
-                      <h2 className="section-title">Zadnji rezultat</h2>
-                      <MatchCard match={recent[0]} />
-                    </div>
-                  )}
-                  {upcoming[0] && (
-                    <div>
-                      <h2 className="section-title">Naslednja tekma</h2>
-                      <MatchCard match={upcoming[0]} />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
-          )}
-
           {/* Latest news */}
           <section className="section">
             <div className="container">
@@ -122,12 +68,23 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* CTA band */}
-          <section className="cta-band">
-            <div className="container cta-band__inner">
-              <h2>Postani del naše zgodbe</h2>
-              <p>Podpri klub na tekmah in spremljaj naše novice.</p>
-              <Link to="/about" className="btn btn--light">Kontaktiraj nas<IconArrowRight /></Link>
+          {/* Recent matches */}
+          <section className="section section--tight">
+            <div className="container">
+              <div className="section-head">
+                <div>
+                  <div className="eyebrow">Rezultati</div>
+                  <h2 className="section-title">Zadnje tekme</h2>
+                </div>
+                <Link to="/matches" className="btn btn--outline btn--sm">Vse tekme</Link>
+              </div>
+              {matches.length === 0 ? (
+                <EmptyState title="Ni tekem" text="Podatki bodo kmalu na voljo." />
+              ) : (
+                <div className="grid grid--3">
+                  {matches.map((m) => <MatchCard key={m._id} match={m} />)}
+                </div>
+              )}
             </div>
           </section>
         </>

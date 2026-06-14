@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { imageUrl } from '../api/client.js';
 import { formatDate } from '../utils/format.js';
+import { IconArrowRight } from './icons.jsx';
 
 export default function NewsCard({ item }) {
   return (
@@ -19,7 +20,7 @@ export default function NewsCard({ item }) {
           <Link to={`/news/${item.slug}`}>{item.title}</Link>
         </h3>
         <p className="news-card__excerpt">{item.excerpt}</p>
-        <Link to={`/news/${item.slug}`} className="news-card__more">Preberi več →</Link>
+        <Link to={`/news/${item.slug}`} className="news-card__more">Preberi več <IconArrowRight size={16} /></Link>
       </div>
     </article>
   );

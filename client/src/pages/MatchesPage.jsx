@@ -43,7 +43,6 @@ export default function MatchesPage() {
             <EmptyState
               title={tab === 'upcoming' ? 'Ni prihajajočih tekem' : 'Ni odigranih tekem'}
               text="Podatki bodo kmalu na voljo."
-              icon="⚽"
             />
           ) : (
             <div className="grid grid--2 matches-grid">

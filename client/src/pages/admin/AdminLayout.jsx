@@ -2,13 +2,17 @@ import { useState } from 'react';
 import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import Logo from '../../components/Logo.jsx';
+import {
+  IconDashboard, IconNewspaper, IconUsers, IconCalendar, IconShield,
+  IconExternal, IconLogout, IconMenu, IconUser,
+} from '../../components/icons.jsx';
 
 const NAV = [
-  { to: '/admin', label: 'Nadzorna plošča', icon: '📊', end: true },
-  { to: '/admin/news', label: 'Novice', icon: '📰' },
-  { to: '/admin/players', label: 'Igralci', icon: '👕' },
-  { to: '/admin/matches', label: 'Tekme', icon: '⚽' },
-  { to: '/admin/club', label: 'Podatki kluba', icon: '🏟️' },
+  { to: '/admin', label: 'Nadzorna plošča', Icon: IconDashboard, end: true },
+  { to: '/admin/news', label: 'Novice', Icon: IconNewspaper },
+  { to: '/admin/players', label: 'Igralci', Icon: IconUsers },
+  { to: '/admin/matches', label: 'Tekme', Icon: IconCalendar },
+  { to: '/admin/club', label: 'Podatki kluba', Icon: IconShield },
 ];
 
 export default function AdminLayout() {
@@ -25,29 +29,33 @@ export default function AdminLayout() {
     <div className="admin">
       <aside className={`admin__sidebar ${open ? 'is-open' : ''}`}>
         <Link to="/admin" className="admin__brand" onClick={() => setOpen(false)}>
-          <Logo size={40} />
+          <Logo size={38} />
           <span>Admin</span>
         </Link>
         <nav className="admin__nav">
-          {NAV.map((n) => (
-            <NavLink key={n.to} to={n.to} end={n.end} onClick={() => setOpen(false)}
+          {NAV.map(({ to, label, Icon, end }) => (
+            <NavLink key={to} to={to} end={end} onClick={() => setOpen(false)}
               className={({ isActive }) => `admin__nav-link ${isActive ? 'is-active' : ''}`}>
-              <span className="admin__nav-icon">{n.icon}</span> {n.label}
+              <span className="admin__nav-icon"><Icon /></span> {label}
             </NavLink>
           ))}
         </nav>
         <div className="admin__sidebar-foot">
-          <a href="/" target="_blank" rel="noopener noreferrer" className="admin__nav-link">↗ Ogled strani</a>
-          <button className="admin__nav-link admin__logout" onClick={onLogout}>⎋ Odjava</button>
+          <a href="/" target="_blank" rel="noopener noreferrer" className="admin__nav-link">
+            <span className="admin__nav-icon"><IconExternal /></span> Ogled strani
+          </a>
+          <button className="admin__nav-link admin__logout" onClick={onLogout}>
+            <span className="admin__nav-icon"><IconLogout /></span> Odjava
+          </button>
         </div>
       </aside>
 
       <div className="admin__main">
         <header className="admin__topbar">
-          <button className="admin__menu-btn" onClick={() => setOpen((v) => !v)} aria-label="Meni">☰</button>
+          <button className="admin__menu-btn" onClick={() => setOpen((v) => !v)} aria-label="Meni"><IconMenu /></button>
           <span className="admin__topbar-title">Upravljanje vsebine</span>
           <span className="spacer" />
-          <span className="admin__user">👤 {user?.username}</span>
+          <span className="admin__user"><IconUser /> {user?.username}</span>
         </header>
         <main className="admin__content">
           <Outlet />

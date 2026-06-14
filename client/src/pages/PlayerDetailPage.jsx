@@ -5,6 +5,7 @@ import { imageUrl, errMessage } from '../api/client.js';
 import { POSITION_LABELS, formatDate, ageFrom } from '../utils/format.js';
 import Loader from '../components/Loader.jsx';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
+import { IconArrowLeft, IconGlobe, IconCalendar, IconRuler } from '../components/icons.jsx';
 
 export default function PlayerDetailPage() {
   const { id } = useParams();
@@ -58,16 +59,16 @@ export default function PlayerDetailPage() {
             )}
           </div>
           <div className="player-hero__info">
-            <Link to="/players" className="player-hero__back">← Kader</Link>
-            <span className="badge badge--gold">{POSITION_LABELS[player.position]}</span>
+            <Link to="/players" className="player-hero__back"><IconArrowLeft size={18} /> Kader</Link>
+            <span className="badge badge--light">{POSITION_LABELS[player.position]}</span>
             <h1>
               {player.shirtNumber != null && <span className="player-hero__num">{player.shirtNumber}</span>}
               {player.name}
             </h1>
             <div className="player-hero__facts">
-              {player.nationality && <span>🌍 {player.nationality}</span>}
-              {player.birthdate && <span>🎂 {formatDate(player.birthdate)}{age != null ? ` (${age} let)` : ''}</span>}
-              {player.heightCm && <span>📏 {player.heightCm} cm</span>}
+              {player.nationality && <span><IconGlobe /> {player.nationality}</span>}
+              {player.birthdate && <span><IconCalendar /> {formatDate(player.birthdate)}{age != null ? ` (${age} let)` : ''}</span>}
+              {player.heightCm && <span><IconRuler /> {player.heightCm} cm</span>}
             </div>
           </div>
         </div>

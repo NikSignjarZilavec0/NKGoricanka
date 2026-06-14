@@ -4,6 +4,7 @@ import { newsApi, playersApi, matchesApi } from '../../api/services.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import Loader from '../../components/Loader.jsx';
 import useDocumentTitle from '../../hooks/useDocumentTitle.js';
+import { IconNewspaper, IconUsers, IconCalendar } from '../../components/icons.jsx';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -29,25 +30,25 @@ export default function AdminDashboard() {
   if (!stats) return <Loader />;
 
   const cards = [
-    { to: '/admin/news', label: 'Novice', value: stats.news, sub: `${stats.newsDrafts} osnutkov`, icon: '📰' },
-    { to: '/admin/players', label: 'Igralci', value: stats.players, sub: 'v kadru', icon: '👕' },
-    { to: '/admin/matches', label: 'Tekme', value: stats.matches, sub: `${stats.upcoming} prihajajočih`, icon: '⚽' },
+    { to: '/admin/news', label: 'Novice', value: stats.news, sub: `${stats.newsDrafts} osnutkov`, Icon: IconNewspaper },
+    { to: '/admin/players', label: 'Igralci', value: stats.players, sub: 'v kadru', Icon: IconUsers },
+    { to: '/admin/matches', label: 'Tekme', value: stats.matches, sub: `${stats.upcoming} prihajajočih`, Icon: IconCalendar },
   ];
 
   return (
     <>
       <div className="admin-page-head">
-        <h1>Pozdravljen, {user?.username}! 👋</h1>
+        <h1>Pozdravljen, {user?.username}</h1>
         <p className="text-muted">Tukaj upravljaš vsebino spletne strani NK Goričanka.</p>
       </div>
 
       <div className="grid grid--3 admin-stats">
-        {cards.map((c) => (
-          <Link key={c.to} to={c.to} className="card admin-stat">
-            <span className="admin-stat__icon">{c.icon}</span>
-            <div className="admin-stat__num">{c.value}</div>
-            <div className="admin-stat__label">{c.label}</div>
-            <div className="admin-stat__sub text-muted">{c.sub}</div>
+        {cards.map(({ to, label, value, sub, Icon }) => (
+          <Link key={to} to={to} className="card admin-stat">
+            <span className="admin-stat__icon"><Icon /></span>
+            <div className="admin-stat__num">{value}</div>
+            <div className="admin-stat__label">{label}</div>
+            <div className="admin-stat__sub text-muted">{sub}</div>
           </Link>
         ))}
       </div>

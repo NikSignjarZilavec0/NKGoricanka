@@ -23,7 +23,7 @@ export default function NewsListPage() {
           {loading ? (
             <Loader />
           ) : news.length === 0 ? (
-            <EmptyState title="Še ni novic" text="Novice bodo kmalu na voljo." icon="📰" />
+            <EmptyState title="Še ni novic" text="Novice bodo kmalu na voljo." />
           ) : (
             <div className="grid grid--3">
               {news.map((n) => <NewsCard key={n._id} item={n} />)}

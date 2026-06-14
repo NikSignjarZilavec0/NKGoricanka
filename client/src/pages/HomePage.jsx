@@ -7,6 +7,16 @@ import MatchCard from '../components/MatchCard.jsx';
 import Loader from '../components/Loader.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
+import {
+  IconNewspaper, IconUsers, IconCalendar, IconShield, IconArrowRight,
+} from '../components/icons.jsx';
+
+const QUICK_LINKS = [
+  { to: '/news', Icon: IconNewspaper, title: 'Novice', text: 'Zadnje iz kluba' },
+  { to: '/players', Icon: IconUsers, title: 'Kader', text: 'Naši igralci' },
+  { to: '/matches', Icon: IconCalendar, title: 'Tekme', text: 'Razpored & rezultati' },
+  { to: '/about', Icon: IconShield, title: 'O klubu', text: 'Zgodovina & kontakt' },
+];
 
 export default function HomePage() {
   const { club } = useClub();
@@ -44,10 +54,10 @@ export default function HomePage() {
           </h1>
           <p className="hero__lead">
             Spremljajte novice, igralski kader, razpored tekem in rezultate našega kluba.
-            Skupaj v rdeče-rumenih barvah!
+            Skupaj nosimo rdečo.
           </p>
           <div className="hero__cta">
-            <Link to="/matches" className="btn btn--gold">Razpored tekem</Link>
+            <Link to="/matches" className="btn btn--light">Razpored tekem<IconArrowRight /></Link>
             <Link to="/players" className="btn btn--ghost">Spoznaj ekipo</Link>
           </div>
         </div>
@@ -55,17 +65,12 @@ export default function HomePage() {
 
       {/* Quick links */}
       <section className="container quicklinks">
-        {[
-          { to: '/news', icon: '📰', title: 'Novice', text: 'Zadnje iz kluba' },
-          { to: '/players', icon: '👕', title: 'Kader', text: 'Naši igralci' },
-          { to: '/matches', icon: '⚽', title: 'Tekme', text: 'Razpored & rezultati' },
-          { to: '/about', icon: '🏟️', title: 'O klubu', text: 'Zgodovina & kontakt' },
-        ].map((q) => (
-          <Link key={q.to} to={q.to} className="quicklink card">
-            <span className="quicklink__icon">{q.icon}</span>
+        {QUICK_LINKS.map(({ to, Icon, title, text }) => (
+          <Link key={to} to={to} className="quicklink card">
+            <span className="quicklink__icon"><Icon /></span>
             <div>
-              <strong>{q.title}</strong>
-              <small>{q.text}</small>
+              <strong>{title}</strong>
+              <small>{text}</small>
             </div>
           </Link>
         ))}
@@ -108,7 +113,7 @@ export default function HomePage() {
                 <Link to="/news" className="btn btn--outline btn--sm">Vse novice</Link>
               </div>
               {news.length === 0 ? (
-                <EmptyState title="Še ni novic" text="Novice bodo kmalu na voljo." icon="📰" />
+                <EmptyState title="Še ni novic" text="Novice bodo kmalu na voljo." />
               ) : (
                 <div className="grid grid--3">
                   {news.map((n) => <NewsCard key={n._id} item={n} />)}
@@ -117,12 +122,12 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* Colors band */}
+          {/* CTA band */}
           <section className="cta-band">
             <div className="container cta-band__inner">
-              <h2>Pridruži se rdeče-rumeni družini!</h2>
+              <h2>Postani del naše zgodbe</h2>
               <p>Podpri klub na tekmah in spremljaj naše novice.</p>
-              <Link to="/about" className="btn btn--gold">Kontaktiraj nas</Link>
+              <Link to="/about" className="btn btn--light">Kontaktiraj nas<IconArrowRight /></Link>
             </div>
           </section>
         </>

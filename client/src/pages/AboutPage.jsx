@@ -2,6 +2,7 @@ import { useClub } from '../context/ClubContext.jsx';
 import PageHeader from '../components/PageHeader.jsx';
 import Loader from '../components/Loader.jsx';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
+import { IconMapPin, IconMail, IconPhone } from '../components/icons.jsx';
 
 export default function AboutPage() {
   const { club, loading } = useClub();
@@ -27,9 +28,10 @@ export default function AboutPage() {
                 <div className="about-fact"><strong>{club.foundedYear}</strong><span>Leto ustanovitve</span></div>
               )}
               <div className="about-fact">
-                <strong style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
-                  <span style={{ width: 22, height: 22, borderRadius: 6, background: 'var(--red)' }} />
-                  <span style={{ width: 22, height: 22, borderRadius: 6, background: 'var(--gold)' }} />
+                <strong className="about-swatches">
+                  <i style={{ background: 'var(--red-400)' }} />
+                  <i style={{ background: 'var(--red-600)' }} />
+                  <i style={{ background: 'var(--red-800)' }} />
                 </strong>
                 <span>Klubske barve</span>
               </div>
@@ -40,9 +42,9 @@ export default function AboutPage() {
           <aside className="about-side card">
             <h3>Kontakt</h3>
             <ul className="about-contact">
-              {club?.address && <li><span>📍</span> {club.address}</li>}
-              {club?.email && <li><span>✉️</span> <a href={`mailto:${club.email}`}>{club.email}</a></li>}
-              {club?.phone && <li><span>📞</span> <a href={`tel:${club.phone.replace(/\s+/g, '')}`}>{club.phone}</a></li>}
+              {club?.address && <li><IconMapPin /> {club.address}</li>}
+              {club?.email && <li><IconMail /> <a href={`mailto:${club.email}`}>{club.email}</a></li>}
+              {club?.phone && <li><IconPhone /> <a href={`tel:${club.phone.replace(/\s+/g, '')}`}>{club.phone}</a></li>}
             </ul>
             {club?.socialLinks && Object.values(club.socialLinks).some(Boolean) && (
               <>

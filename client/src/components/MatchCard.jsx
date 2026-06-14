@@ -2,6 +2,7 @@ import { imageUrl } from '../api/client.js';
 import { formatDateTime, STATUS_LABELS } from '../utils/format.js';
 import { useClub } from '../context/ClubContext.jsx';
 import Logo from './Logo.jsx';
+import { IconCalendar, IconMapPin, IconBall } from './icons.jsx';
 
 /** A single fixture/result row. Always shows the match from our perspective. */
 export default function MatchCard({ match }) {
@@ -23,7 +24,7 @@ export default function MatchCard({ match }) {
   }
 
   const statusBadge = {
-    upcoming: 'badge--gold',
+    upcoming: '',
     finished: 'badge--green',
     cancelled: 'badge--gray',
   }[match.status];
@@ -49,13 +50,14 @@ export default function MatchCard({ match }) {
       </div>
 
       <div className="match-card__bottom">
-        <span>🗓 {formatDateTime(match.date)}</span>
-        {match.location && <span>📍 {match.location}</span>}
+        <span><IconCalendar /> {formatDateTime(match.date)}</span>
+        {match.location && <span><IconMapPin /> {match.location}</span>}
       </div>
 
       {finished && match.scorers?.length > 0 && (
         <div className="match-card__scorers">
-          ⚽ {match.scorers.map((s) => `${s.playerName}${s.minute ? ` ${s.minute}'` : ''}`).join(', ')}
+          <IconBall />
+          {match.scorers.map((s) => `${s.playerName}${s.minute ? ` ${s.minute}'` : ''}`).join(', ')}
         </div>
       )}
     </div>

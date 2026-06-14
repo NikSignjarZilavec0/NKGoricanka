@@ -22,10 +22,10 @@ export function ClubProvider({ children }) {
     refresh();
   }, [refresh]);
 
-  // Apply club colors to the document so admin colour changes take effect live.
+  // Apply the club's primary colour to the document so admin changes take effect
+  // live. (The palette is red-only by design — the accent colour is not used.)
   useEffect(() => {
     if (club?.colors?.primary) document.documentElement.style.setProperty('--red', club.colors.primary);
-    if (club?.colors?.accent) document.documentElement.style.setProperty('--gold', club.colors.accent);
   }, [club]);
 
   return (

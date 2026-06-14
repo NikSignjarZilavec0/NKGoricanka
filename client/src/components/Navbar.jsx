@@ -48,7 +48,7 @@ export default function Navbar() {
               {l.label}
             </NavLink>
           ))}
-          <Link to="/admin" className="btn btn--gold btn--sm navbar__admin" onClick={close}>
+          <Link to="/admin" className="btn btn--primary btn--sm navbar__admin" onClick={close}>
             Admin
           </Link>
         </nav>

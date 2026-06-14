@@ -24,7 +24,7 @@ export default function PlayersPage() {
           {loading ? (
             <Loader />
           ) : players.length === 0 ? (
-            <EmptyState title="Kader še ni objavljen" text="Igralci bodo kmalu dodani." icon="👕" />
+            <EmptyState title="Kader še ni objavljen" text="Igralci bodo kmalu dodani." />
           ) : (
             POSITION_GROUPS.map((group) => {
               const list = players.filter((p) => p.position === group.key);

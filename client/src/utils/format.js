@@ -16,6 +16,7 @@ export const POSITION_GROUPS = [
 
 export const STATUS_LABELS = {
   upcoming: 'Prihajajoča',
+  live: 'V živo',
   finished: 'Odigrana',
   cancelled: 'Odpovedana',
 };

@@ -7,11 +7,16 @@ import MatchCard from '../components/MatchCard.jsx';
 import Loader from '../components/Loader.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
+import useMatchStream from '../hooks/useMatchStream.js';
+import Logo from '../components/Logo.jsx';
+
+const byDateAsc = (a, b) => new Date(a.date) - new Date(b.date);
+const byDateDesc = (a, b) => new Date(b.date) - new Date(a.date);
 
 export default function HomePage() {
   const { club } = useClub();
   const [news, setNews] = useState([]);
-  const [matches, setMatches] = useState([]);
+  const [m, setM] = useState({ live: [], upcoming: [], finished: [] });
   const [loading, setLoading] = useState(true);
 
   useDocumentTitle('NK Goričanka — uradna spletna stran');
@@ -19,75 +24,77 @@ export default function HomePage() {
   useEffect(() => {
     Promise.all([
       newsApi.listPublished().catch(() => []),
-      matchesApi.list('finished').catch(() => []),
+      matchesApi.list('live').catch(() => []),
       matchesApi.list('upcoming').catch(() => []),
+      matchesApi.list('finished').catch(() => []),
     ])
-      .then(([n, finished, upcoming]) => {
-        setNews(n.slice(0, 3));
-        // "Zadnje tekme": recent results; fall back to upcoming if none played yet.
-        setMatches((finished.length ? finished : upcoming).slice(0, 3));
+      .then(([n, live, upcoming, finished]) => {
+        setNews(n.slice(0, 4));
+        setM({ live, upcoming, finished });
       })
       .finally(() => setLoading(false));
   }, []);
 
+  useMatchStream((match) => {
+    setM((d) => {
+      const strip = (arr) => arr.filter((x) => x._id !== match._id);
+      const next = { live: strip(d.live), upcoming: strip(d.upcoming), finished: strip(d.finished) };
+      if (match.status === 'live') next.live = [match, ...next.live];
+      else if (match.status === 'upcoming') next.upcoming = [...next.upcoming, match].sort(byDateAsc);
+      else if (match.status === 'finished') next.finished = [match, ...next.finished].sort(byDateDesc);
+      return next;
+    });
+  });
+
+  // Matches column: live first, then the next upcoming (if any), then recent results.
+  const nextUp = m.upcoming[0];
+  const colMatches = [...m.live, ...(nextUp ? [nextUp] : []), ...m.finished.slice(0, 3)];
+
   return (
     <>
-      {/* Hero — text only */}
-      <section className="hero">
-        <div className="hero__overlay" />
-        <div className="container hero__content">
-          <span className="hero__eyebrow">Nogometni klub Goričanka</span>
-          <h1 className="hero__title">
-            {club?.name || 'NK Goričanka'}
-            <span className="hero__title-accent">Uradna spletna stran</span>
-          </h1>
+      {/* Hero — team photo banner + club name */}
+      <section className="home-hero">
+        <div className="home-hero__overlay" />
+        <div className="container home-hero__content">
+          <Logo size={92} className="home-hero__crest" />
+          <h1 className="home-hero__title">{club?.name || 'NK Goričanka'}</h1>
+          <span className="home-hero__subtitle">Uradna spletna stran</span>
         </div>
+        <div className="home-hero__caption">Prostor za fotografijo članske ekipe</div>
       </section>
 
       {loading ? (
         <Loader full />
       ) : (
-        <>
-          {/* Latest news */}
-          <section className="section">
-            <div className="container">
-              <div className="section-head">
-                <div>
-                  <div className="eyebrow">Aktualno</div>
-                  <h2 className="section-title">Zadnje novice</h2>
-                </div>
-                <Link to="/news" className="btn btn--outline btn--sm">Vse novice</Link>
-              </div>
+        <section className="section">
+          <div className="container home-cols">
+            {/* News column */}
+            <div className="home-col">
+              <h2 className="section-title">Novice</h2>
               {news.length === 0 ? (
                 <EmptyState title="Še ni novic" text="Novice bodo kmalu na voljo." />
               ) : (
-                <div className="grid grid--3">
+                <div className="home-col__list">
                   {news.map((n) => <NewsCard key={n._id} item={n} />)}
                 </div>
               )}
+              <Link to="/news" className="btn btn--primary btn--block home-col__all">Vse novice</Link>
             </div>
-          </section>
 
-          {/* Recent matches */}
-          <section className="section section--tight">
-            <div className="container">
-              <div className="section-head">
-                <div>
-                  <div className="eyebrow">Rezultati</div>
-                  <h2 className="section-title">Zadnje tekme</h2>
-                </div>
-                <Link to="/matches" className="btn btn--outline btn--sm">Vse tekme</Link>
-              </div>
-              {matches.length === 0 ? (
-                <EmptyState title="Ni tekem" text="Podatki bodo kmalu na voljo." />
+            {/* Matches column */}
+            <div className="home-col">
+              <h2 className="section-title">Tekme</h2>
+              {colMatches.length === 0 ? (
+                <EmptyState title="Ni tekem" text="Razpored bo kmalu na voljo." />
               ) : (
-                <div className="grid grid--3">
-                  {matches.map((m) => <MatchCard key={m._id} match={m} />)}
+                <div className="home-col__list">
+                  {colMatches.map((match) => <MatchCard key={match._id} match={match} />)}
                 </div>
               )}
+              <Link to="/matches" className="btn btn--primary btn--block home-col__all">Vse tekme</Link>
             </div>
-          </section>
-        </>
+          </div>
+        </section>
       )}
     </>
   );

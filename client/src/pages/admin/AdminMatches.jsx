@@ -8,7 +8,7 @@ import useDocumentTitle from '../../hooks/useDocumentTitle.js';
 
 const EMPTY = {
   opponent: '', isHome: true, date: '', location: '', competition: '1. MNL Murska Sobota',
-  season: '2025/26', status: 'upcoming', scoreOurs: '', scoreTheirs: '',
+  season: '2025/26', status: 'upcoming', scoreOurs: '', scoreTheirs: '', minute: '',
 };
 
 export default function AdminMatches() {
@@ -20,10 +20,29 @@ export default function AdminMatches() {
   const [file, setFile] = useState(null);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [liveInfo, setLiveInfo] = useState(null); // { match, liveUrl, liveKey }
+  const [liveBusy, setLiveBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
   useDocumentTitle('Tekme — Admin');
 
   const load = () => matchesApi.list().then(setItems).catch(() => setItems([]));
   useEffect(() => { load(); }, []);
+
+  const openLive = async (m) => {
+    setLiveBusy(true);
+    try {
+      const res = await matchesApi.generateLiveKey(m._id);
+      setLiveInfo({ match: m, ...res });
+      setCopied(false);
+    } catch (err) {
+      window.alert(errMessage(err, 'Ni bilo mogoče ustvariti povezave.'));
+    } finally {
+      setLiveBusy(false);
+    }
+  };
+  const copyLive = async () => {
+    try { await navigator.clipboard.writeText(liveInfo.liveUrl); setCopied(true); } catch { /* ignore */ }
+  };
 
   const openNew = () => { setEditing(null); setForm(EMPTY); setScorers([]); setFile(null); setError(''); setModal(true); };
   const openEdit = (m) => {
@@ -32,7 +51,7 @@ export default function AdminMatches() {
       opponent: m.opponent || '', isHome: m.isHome !== false, date: toDateTimeInput(m.date),
       location: m.location || '', competition: m.competition || '', season: m.season || '',
       status: m.status || 'upcoming',
-      scoreOurs: m.score?.ours ?? '', scoreTheirs: m.score?.theirs ?? '',
+      scoreOurs: m.score?.ours ?? '', scoreTheirs: m.score?.theirs ?? '', minute: m.minute ?? '',
     });
     setScorers((m.scorers || []).map((s) => ({ playerName: s.playerName, minute: s.minute ?? '' })));
     setModal(true);
@@ -57,6 +76,7 @@ export default function AdminMatches() {
       fd.append('date', form.date);
       fd.append('scoreOurs', form.scoreOurs);
       fd.append('scoreTheirs', form.scoreTheirs);
+      fd.append('minute', form.minute);
       fd.append('scorers', JSON.stringify(
         scorers.filter((s) => s.playerName.trim()).map((s) => ({ playerName: s.playerName.trim(), minute: s.minute })))
       );
@@ -80,7 +100,7 @@ export default function AdminMatches() {
 
   if (!items) return <Loader />;
 
-  const showScore = form.status === 'finished';
+  const showScore = form.status === 'finished' || form.status === 'live';
 
   return (
     <>
@@ -99,9 +119,10 @@ export default function AdminMatches() {
                 <td>{formatDateTime(m.date)}</td>
                 <td><strong>{m.opponent}</strong><br /><small className="text-muted">{m.competition}</small></td>
                 <td>{m.isHome ? 'Doma' : 'Gosti'}</td>
-                <td>{m.status === 'finished' && m.score?.ours != null ? `${m.score.ours} : ${m.score.theirs}` : '–'}</td>
-                <td><span className={`badge ${m.status === 'finished' ? 'badge--green' : m.status === 'cancelled' ? 'badge--gray' : 'badge--gold'}`}>{STATUS_LABELS[m.status]}</span></td>
+                <td>{(m.status === 'finished' || m.status === 'live') && m.score?.ours != null ? `${m.score.ours} : ${m.score.theirs}` : '–'}</td>
+                <td><span className={`badge ${m.status === 'finished' ? 'badge--green' : m.status === 'cancelled' ? 'badge--gray' : m.status === 'live' ? 'badge--live' : ''}`}>{STATUS_LABELS[m.status]}</span></td>
                 <td className="admin-actions">
+                  <button className="btn btn--outline btn--sm" disabled={liveBusy} onClick={() => openLive(m)}>Živo</button>
                   <button className="btn btn--outline btn--sm" onClick={() => openEdit(m)}>Uredi</button>
                   <button className="btn btn--sm admin-del" onClick={() => onDelete(m)}>Izbriši</button>
                 </td>
@@ -146,6 +167,8 @@ export default function AdminMatches() {
                   <input className="input" type="number" min="0" name="scoreOurs" value={form.scoreOurs} onChange={onChange} /></div>
                 <div className="field" style={{ flex: 1 }}><label>Goli nasprotnika</label>
                   <input className="input" type="number" min="0" name="scoreTheirs" value={form.scoreTheirs} onChange={onChange} /></div>
+                <div className="field" style={{ flex: 1 }}><label>Minuta {form.status === 'live' ? '(v živo)' : ''}</label>
+                  <input className="input" type="number" min="0" max="130" name="minute" value={form.minute} onChange={onChange} /></div>
               </div>
 
               <h4 className="admin-form-section">Strelci <button type="button" className="btn btn--outline btn--sm" onClick={addScorer}>+ Dodaj</button></h4>
@@ -170,6 +193,28 @@ export default function AdminMatches() {
             <button className="btn btn--primary" disabled={saving}>{saving ? 'Shranjujem…' : 'Shrani'}</button>
           </div>
         </form>
+      </Modal>
+
+      <Modal open={!!liveInfo} title="Povezava za živo posodabljanje" onClose={() => setLiveInfo(null)}>
+        {liveInfo && (
+          <>
+            <p className="text-muted">
+              Pošlji to povezavo osebi na tekmi (<strong>{liveInfo.match.opponent}</strong>). Z njo lahko v živo
+              posodablja rezultat, strelce, minuto in status — brez prijave. Posodobitve so takoj vidne obiskovalcem.
+            </p>
+            <div className="field">
+              <label>Povezava za živo</label>
+              <input className="input" readOnly value={liveInfo.liveUrl} onFocus={(e) => e.target.select()} />
+            </div>
+            <div className="modal__foot">
+              <a className="btn btn--outline" href={liveInfo.liveUrl} target="_blank" rel="noopener noreferrer">Odpri</a>
+              <button className="btn btn--primary" onClick={copyLive}>{copied ? 'Kopirano ✓' : 'Kopiraj povezavo'}</button>
+            </div>
+            <p className="text-muted" style={{ marginTop: 10, fontSize: '0.85rem' }}>
+              Z ustvarjanjem nove povezave prejšnja preneha veljati.
+            </p>
+          </>
+        )}
       </Modal>
     </>
   );

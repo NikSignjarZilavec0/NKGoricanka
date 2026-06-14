@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-export const MATCH_STATUS = ['upcoming', 'finished', 'cancelled'];
+export const MATCH_STATUS = ['upcoming', 'live', 'finished', 'cancelled'];
 
 const scorerSchema = new mongoose.Schema(
   {
@@ -30,8 +30,20 @@ const matchSchema = new mongoose.Schema(
     status: { type: String, enum: MATCH_STATUS, default: 'upcoming' },
     score: { type: scoreSchema, default: () => ({}) },
     scorers: { type: [scorerSchema], default: [] },
+    // Live coverage
+    minute: { type: Number, min: 0, max: 130, default: null }, // current match minute
+    liveKey: { type: String, default: '', select: false }, // secret token for live contributors
+    liveUpdatedAt: { type: Date },
   },
   { timestamps: true, versionKey: false }
 );
+
+// Never leak the live key in API responses.
+function stripLiveKey(doc, ret) {
+  delete ret.liveKey;
+  return ret;
+}
+matchSchema.set('toJSON', { transform: stripLiveKey });
+matchSchema.set('toObject', { transform: stripLiveKey });
 
 export default mongoose.model('Match', matchSchema);

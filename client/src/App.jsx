@@ -10,8 +10,10 @@ import NewsDetailPage from './pages/NewsDetailPage.jsx';
 import PlayersPage from './pages/PlayersPage.jsx';
 import PlayerDetailPage from './pages/PlayerDetailPage.jsx';
 import MatchesPage from './pages/MatchesPage.jsx';
+import MatchDetailPage from './pages/MatchDetailPage.jsx';
 import AboutPage from './pages/AboutPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
+import LiveControlPage from './pages/LiveControlPage.jsx';
 
 // Admin pages
 import LoginPage from './pages/admin/LoginPage.jsx';
@@ -35,9 +37,13 @@ export default function App() {
           <Route path="/players" element={<PlayersPage />} />
           <Route path="/players/:id" element={<PlayerDetailPage />} />
           <Route path="/matches" element={<MatchesPage />} />
+          <Route path="/matches/:id" element={<MatchDetailPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
+
+        {/* Live match control (contributor panel, standalone) */}
+        <Route path="/live/:id" element={<LiveControlPage />} />
 
         {/* Admin */}
         <Route path="/admin/login" element={<LoginPage />} />

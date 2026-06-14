@@ -1,45 +1,51 @@
+import { Link } from 'react-router-dom';
 import { imageUrl } from '../api/client.js';
 import { formatDateTime, STATUS_LABELS } from '../utils/format.js';
 import { useClub } from '../context/ClubContext.jsx';
 import Logo from './Logo.jsx';
 import { IconCalendar, IconMapPin, IconBall } from './icons.jsx';
 
-/** A single fixture/result row. Always shows the match from our perspective. */
+/** A single fixture/result card. Always shown from our perspective. Clickable → detail. */
 export default function MatchCard({ match }) {
   const { club } = useClub();
   const us = club?.shortName || 'Goričanka';
+  const live = match.status === 'live';
   const finished = match.status === 'finished';
-  const hasScore = match.score && match.score.ours != null && match.score.theirs != null;
+  const showScore = finished || live;
+  const sc = (v) => (v == null ? (live ? 0 : null) : v);
 
   const home = match.isHome ? us : match.opponent;
   const away = match.isHome ? match.opponent : us;
-  const homeScore = match.isHome ? match.score?.ours : match.score?.theirs;
-  const awayScore = match.isHome ? match.score?.theirs : match.score?.ours;
+  const homeScore = sc(match.isHome ? match.score?.ours : match.score?.theirs);
+  const awayScore = sc(match.isHome ? match.score?.theirs : match.score?.ours);
 
   let resultClass = '';
-  if (finished && hasScore) {
+  if (finished && match.score?.ours != null && match.score?.theirs != null) {
     if (match.score.ours > match.score.theirs) resultClass = 'is-win';
     else if (match.score.ours < match.score.theirs) resultClass = 'is-loss';
     else resultClass = 'is-draw';
   }
-
-  const statusBadge = {
-    upcoming: '',
-    finished: 'badge--green',
-    cancelled: 'badge--gray',
-  }[match.status];
+  if (live) resultClass = 'is-live';
 
   return (
-    <div className={`card match-card ${resultClass}`}>
+    <Link to={`/matches/${match._id}`} className={`card match-card ${resultClass}`}>
       <div className="match-card__top">
         <span className="match-card__comp">{match.competition}</span>
-        <span className={`badge ${statusBadge}`}>{STATUS_LABELS[match.status]}</span>
+        {live ? (
+          <span className="badge badge--live">
+            <span className="live-dot" />V živo{match.minute != null ? ` ${match.minute}'` : ''}
+          </span>
+        ) : (
+          <span className={`badge ${finished ? 'badge--green' : match.status === 'cancelled' ? 'badge--gray' : ''}`}>
+            {STATUS_LABELS[match.status]}
+          </span>
+        )}
       </div>
 
       <div className="match-card__teams">
         <Team name={home} logo={match.isHome ? null : match.opponentLogo} isUs={match.isHome} />
         <div className="match-card__center">
-          {finished && hasScore ? (
+          {showScore && homeScore != null ? (
             <div className="match-card__score">{homeScore}<span>:</span>{awayScore}</div>
           ) : (
             <div className="match-card__vs">VS</div>
@@ -54,13 +60,13 @@ export default function MatchCard({ match }) {
         {match.location && <span><IconMapPin /> {match.location}</span>}
       </div>
 
-      {finished && match.scorers?.length > 0 && (
+      {showScore && match.scorers?.length > 0 && (
         <div className="match-card__scorers">
           <IconBall />
           {match.scorers.map((s) => `${s.playerName}${s.minute ? ` ${s.minute}'` : ''}`).join(', ')}
         </div>
       )}
-    </div>
+    </Link>
   );
 }
 

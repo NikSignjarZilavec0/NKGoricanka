@@ -32,6 +32,13 @@ export const matchesApi = {
   create: (formData) => api.post('/matches', formData, fd()).then((r) => r.data),
   update: (id, formData) => api.put(`/matches/${id}`, formData, fd()).then((r) => r.data),
   remove: (id) => api.delete(`/matches/${id}`).then((r) => r.data),
+  // Live coverage
+  generateLiveKey: (id) => api.post(`/matches/${id}/live-key`).then((r) => r.data),
+  liveUpdate: (id, key, data) =>
+    api
+      .patch(`/matches/${id}/live`, data, { headers: key ? { 'x-live-key': key } : {} })
+      .then((r) => r.data),
+  streamUrl: () => '/api/matches/stream',
 };
 
 export const authApi = {

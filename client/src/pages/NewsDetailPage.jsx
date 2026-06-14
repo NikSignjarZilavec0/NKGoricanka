@@ -5,6 +5,7 @@ import { imageUrl, errMessage } from '../api/client.js';
 import { formatDate } from '../utils/format.js';
 import Loader from '../components/Loader.jsx';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
+import { IconArrowLeft } from '../components/icons.jsx';
 
 export default function NewsDetailPage() {
   const { slug } = useParams();
@@ -43,7 +44,7 @@ export default function NewsDetailPage() {
         )}
         <div className="article-hero__overlay" />
         <div className="container article-hero__content">
-          <Link to="/news" className="article-hero__back">← Vse novice</Link>
+          <Link to="/news" className="article-hero__back"><IconArrowLeft size={18} /> Vse novice</Link>
           <h1>{item.title}</h1>
           <div className="article-hero__meta">
             <time>{formatDate(item.publishedAt || item.createdAt)}</time>

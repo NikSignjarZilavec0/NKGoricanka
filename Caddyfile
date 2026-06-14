@@ -1,0 +1,10 @@
+# Caddy reverse proxy — automatic HTTPS (Let's Encrypt).
+# Zamenjaj "nkgoricanka.si" s SVOJO domeno (pusti obe vrstici, če uporabljaš www).
+# Caddy bo samodejno pridobil in obnavljal SSL certifikat (potrebna sta odprta porta 80 in 443
+# ter DNS zapis, ki kaže na IP strežnika).
+
+nkgoricanka.si, www.nkgoricanka.si {
+	encode gzip
+	# "app" je ime servisa iz docker-compose; Express posluša na 5000 znotraj omrežja.
+	reverse_proxy app:5000
+}

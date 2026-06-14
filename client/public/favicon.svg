@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="12" fill="#c8102e"/>
+  <circle cx="32" cy="28" r="15" fill="#fff"/>
+  <path d="M32 16 l5 4 -2 6 -6 0 -2 -6 z" fill="#111"/>
+  <text x="32" y="56" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="14" fill="#ffcc00">NKG</text>
+</svg>

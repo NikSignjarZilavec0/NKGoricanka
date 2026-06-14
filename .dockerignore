@@ -1,0 +1,11 @@
+**/node_modules
+**/dist
+**/build
+**/client-dist
+**/.git
+**/.env
+**/npm-debug.log
+**/*.log
+server/uploads
+.DS_Store
+README.md

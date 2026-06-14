@@ -1,0 +1,30 @@
+# Produkcijski dodatek: HTTPS reverse proxy (Caddy) pred aplikacijo.
+#
+# Uporaba (na strežniku z domeno):
+#   docker compose -f docker-compose.yml -f docker-compose.caddy.yml up -d --build
+#
+# Caddy prevzame porta 80/443 in posreduje promet na "app:5000" prek internega omrežja.
+# PRIPOROČENO: v docker-compose.yml zakomentiraj "ports:" pod servisom "app",
+# da port 5000 ni javno dostopen (dostop naj bo samo prek Caddy / 443).
+
+services:
+  caddy:
+    image: caddy:2
+    container_name: nkgoricanka-caddy
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp" # HTTP/3
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - nknet
+
+volumes:
+  caddy_data:
+  caddy_config:

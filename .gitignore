@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+client-dist/
+server/uploads/*
+!server/uploads/.gitkeep
+.env
+*.log
+npm-debug.log*
+.DS_Store
+.vscode/
+.idea/
+coverage/

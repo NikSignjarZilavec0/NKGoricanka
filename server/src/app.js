@@ -19,6 +19,10 @@ export function createApp({ mongoUri, sessionSecret, siteUrl }) {
   app.set('trust proxy', 1); // correct client IP / secure cookies behind a proxy
 
   // --- Security headers (CSP tuned to allow the SPA + OpenStreetMap embed) ---
+  // Over plain HTTP, Helmet's default `upgrade-insecure-requests` + HSTS would
+  // force the browser to fetch assets over HTTPS and break the SPA (blank page).
+  // Enable them only in HTTPS mode (SECURE_COOKIES=true, e.g. behind Caddy).
+  const httpsMode = process.env.SECURE_COOKIES === 'true';
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -32,8 +36,10 @@ export function createApp({ mongoUri, sessionSecret, siteUrl }) {
           fontSrc: ["'self'", 'data:'],
           objectSrc: ["'none'"],
           baseUri: ["'self'"],
+          upgradeInsecureRequests: httpsMode ? [] : null,
         },
       },
+      hsts: httpsMode,
       crossOriginEmbedderPolicy: false,
     })
   );

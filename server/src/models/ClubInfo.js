@@ -22,6 +22,7 @@ const clubInfoSchema = new mongoose.Schema(
       twitter: { type: String, default: '' },
     },
     logo: { type: String, default: '' },
+    teamPhoto: { type: String, default: '' }, // hero photo of the first team (homepage)
     mapEmbedUrl: { type: String, default: '' },
     latitude: { type: Number },
     longitude: { type: Number },

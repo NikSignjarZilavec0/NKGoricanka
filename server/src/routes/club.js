@@ -6,6 +6,14 @@ import * as ctrl from '../controllers/clubController.js';
 const router = Router();
 
 router.get('/', ctrl.get);
-router.put('/', requireAuth, upload.single('logo'), ctrl.update);
+router.put(
+  '/',
+  requireAuth,
+  upload.fields([
+    { name: 'logo', maxCount: 1 },
+    { name: 'teamPhoto', maxCount: 1 },
+  ]),
+  ctrl.update
+);
 
 export default router;

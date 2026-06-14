@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { newsApi, matchesApi } from '../api/services.js';
+import { imageUrl } from '../api/client.js';
 import { useClub } from '../context/ClubContext.jsx';
 import NewsCard from '../components/NewsCard.jsx';
 import MatchCard from '../components/MatchCard.jsx';
@@ -53,14 +54,17 @@ export default function HomePage() {
   return (
     <>
       {/* Hero — team photo banner + club name */}
-      <section className="home-hero">
+      <section className={`home-hero ${club?.teamPhoto ? 'has-photo' : ''}`}>
+        {club?.teamPhoto && (
+          <img className="home-hero__img" src={imageUrl(club.teamPhoto)} alt={`${club?.name || 'NK Goričanka'} — ekipa`} />
+        )}
         <div className="home-hero__overlay" />
         <div className="container home-hero__content">
           <Logo size={92} className="home-hero__crest" />
           <h1 className="home-hero__title">{club?.name || 'NK Goričanka'}</h1>
           <span className="home-hero__subtitle">Uradna spletna stran</span>
         </div>
-        <div className="home-hero__caption">Prostor za fotografijo članske ekipe</div>
+        {!club?.teamPhoto && <div className="home-hero__caption">Prostor za fotografijo članske ekipe</div>}
       </section>
 
       {loading ? (

@@ -10,6 +10,8 @@ export default function AdminClub() {
   const [form, setForm] = useState(null);
   const [file, setFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState('');
+  const [teamFile, setTeamFile] = useState(null);
+  const [teamPreview, setTeamPreview] = useState('');
   const [msg, setMsg] = useState(null);
   const [saving, setSaving] = useState(false);
   useDocumentTitle('Podatki kluba — Admin');
@@ -25,6 +27,7 @@ export default function AdminClub() {
         mapEmbedUrl: c.mapEmbedUrl || '', latitude: c.latitude ?? '', longitude: c.longitude ?? '',
       });
       setLogoPreview(c.logo ? imageUrl(c.logo) : '/logo.svg');
+      setTeamPreview(c.teamPhoto ? imageUrl(c.teamPhoto) : '');
     });
   }, []);
 
@@ -39,6 +42,12 @@ export default function AdminClub() {
     if (f) setLogoPreview(URL.createObjectURL(f));
   };
 
+  const onTeamFile = (e) => {
+    const f = e.target.files[0];
+    setTeamFile(f);
+    if (f) setTeamPreview(URL.createObjectURL(f));
+  };
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setSaving(true); setMsg(null);
@@ -51,6 +60,7 @@ export default function AdminClub() {
         facebook: form.facebook, instagram: form.instagram, youtube: form.youtube, twitter: form.twitter,
       }));
       if (file) fd.append('logo', file);
+      if (teamFile) fd.append('teamPhoto', teamFile);
       await clubApi.update(fd);
       await refresh();
       setMsg({ type: 'success', text: 'Podatki kluba so shranjeni.' });
@@ -103,6 +113,15 @@ export default function AdminClub() {
           <div className="field" style={{ flex: 1 }}><label>Grb / logotip</label>
             <input className="input" type="file" accept="image/*" onChange={onFile} /></div>
           {logoPreview && <img className="admin-preview" src={logoPreview} alt="Grb" style={{ height: 70, width: 'auto' }} />}
+        </div>
+
+        <h3 className="admin-subhead">Fotografija ekipe (domača stran)</h3>
+        <div className="row">
+          <div className="field" style={{ flex: 1 }}>
+            <label>Fotografija članske ekipe — prikaže se v glavi domače strani</label>
+            <input className="input" type="file" accept="image/*" onChange={onTeamFile} />
+          </div>
+          {teamPreview && <img className="admin-preview" src={teamPreview} alt="Fotografija ekipe" style={{ height: 90, width: 'auto' }} />}
         </div>
 
         <h3 className="admin-subhead">Družbena omrežja</h3>

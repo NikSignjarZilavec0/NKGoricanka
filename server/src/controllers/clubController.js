@@ -51,7 +51,9 @@ export async function update(req, res, next) {
       });
     }
 
-    if (req.file) info.logo = publicPath(req.file);
+    // Uploaded files: logo and/or team photo (multer .fields → req.files).
+    if (req.files?.logo?.[0]) info.logo = publicPath(req.files.logo[0]);
+    if (req.files?.teamPhoto?.[0]) info.teamPhoto = publicPath(req.files.teamPhoto[0]);
 
     await info.save();
     res.json(info);

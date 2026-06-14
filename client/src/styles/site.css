@@ -343,11 +343,15 @@
     radial-gradient(40% 70% at 92% 5%, rgba(255, 207, 92, 0.18), transparent 60%),
     linear-gradient(150deg, var(--red-600), var(--red-800) 60%, var(--red-900));
 }
+.home-hero__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .home-hero__overlay {
   position: absolute; inset: 0;
   background:
     repeating-linear-gradient(125deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 26px),
     radial-gradient(120% 90% at 50% 135%, rgba(0, 0, 0, 0.5), transparent 60%);
+}
+.home-hero.has-photo .home-hero__overlay {
+  background: linear-gradient(180deg, rgba(20, 4, 9, 0.5) 0%, rgba(20, 4, 9, 0.55) 40%, rgba(20, 4, 9, 0.82) 100%);
 }
 .home-hero__content { position: relative; padding: 72px 22px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .home-hero__crest { filter: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.45)); margin-bottom: 8px; }

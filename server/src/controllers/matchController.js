@@ -47,9 +47,10 @@ function buildFields(body, file) {
 /** Public/admin: list matches, optionally filtered by status. */
 export async function list(req, res, next) {
   try {
-    const { status } = req.query;
+    const { status, season } = req.query;
     const filter = {};
     if (status) filter.status = status;
+    if (season) filter.season = season;
     const sort = status === 'upcoming' ? { date: 1 } : { date: -1 };
     const matches = await Match.find(filter).sort(sort);
     res.json(matches);

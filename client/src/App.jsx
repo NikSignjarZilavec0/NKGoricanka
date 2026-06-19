@@ -11,6 +11,7 @@ import PlayersPage from './pages/PlayersPage.jsx';
 import PlayerDetailPage from './pages/PlayerDetailPage.jsx';
 import MatchesPage from './pages/MatchesPage.jsx';
 import MatchDetailPage from './pages/MatchDetailPage.jsx';
+import StandingsPage from './pages/StandingsPage.jsx';
 import AboutPage from './pages/AboutPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import LiveControlPage from './pages/LiveControlPage.jsx';
@@ -22,6 +23,7 @@ import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import AdminNews from './pages/admin/AdminNews.jsx';
 import AdminPlayers from './pages/admin/AdminPlayers.jsx';
 import AdminMatches from './pages/admin/AdminMatches.jsx';
+import AdminStandings from './pages/admin/AdminStandings.jsx';
 import AdminClub from './pages/admin/AdminClub.jsx';
 
 export default function App() {
@@ -38,6 +40,7 @@ export default function App() {
           <Route path="/players/:id" element={<PlayerDetailPage />} />
           <Route path="/matches" element={<MatchesPage />} />
           <Route path="/matches/:id" element={<MatchDetailPage />} />
+          <Route path="/standings" element={<StandingsPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
@@ -59,6 +62,7 @@ export default function App() {
           <Route path="news" element={<AdminNews />} />
           <Route path="players" element={<AdminPlayers />} />
           <Route path="matches" element={<AdminMatches />} />
+          <Route path="standings" element={<AdminStandings />} />
           <Route path="club" element={<AdminClub />} />
         </Route>
       </Routes>

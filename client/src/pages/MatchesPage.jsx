@@ -6,25 +6,28 @@ import Loader from '../components/Loader.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
 import useMatchStream from '../hooks/useMatchStream.js';
+import { useSeason } from '../context/SeasonContext.jsx';
 
 const byDateAsc = (a, b) => new Date(a.date) - new Date(b.date);
 const byDateDesc = (a, b) => new Date(b.date) - new Date(a.date);
 
 export default function MatchesPage() {
+  const { season } = useSeason();
   const [tab, setTab] = useState('upcoming');
   const [data, setData] = useState({ live: null, upcoming: null, finished: null });
   const [loading, setLoading] = useState(true);
   useDocumentTitle('Tekme');
 
   useEffect(() => {
+    setLoading(true);
     Promise.all([
-      matchesApi.list('live').catch(() => []),
-      matchesApi.list('upcoming').catch(() => []),
-      matchesApi.list('finished').catch(() => []),
+      matchesApi.list('live', season).catch(() => []),
+      matchesApi.list('upcoming', season).catch(() => []),
+      matchesApi.list('finished', season).catch(() => []),
     ])
       .then(([live, upcoming, finished]) => setData({ live, upcoming, finished }))
       .finally(() => setLoading(false));
-  }, []);
+  }, [season]);
 
   // Real-time: merge any updated match into the correct bucket.
   useMatchStream((m) => {

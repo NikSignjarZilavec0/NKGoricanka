@@ -417,3 +417,36 @@
 .live-stepper__val { font-size: 2rem; font-weight: 900; min-width: 1.5em; display: inline-block; }
 .live-scorer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; border-radius: 12px; background: var(--glass); border: 1px solid var(--glass-border); margin-bottom: 8px; }
 .live-panel__foot { text-align: center; margin: 14px 0; font-size: 0.88rem; }
+
+/* ---------------------- Season select (navbar) ------------------------- */
+.season-select { display: inline-flex; align-items: center; gap: 7px; margin-left: 14px; }
+.season-select__label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.09em; color: rgba(255, 255, 255, 0.55); font-weight: 700; }
+.season-select__input { background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 0.85rem; cursor: pointer; }
+.season-select__input option { color: #1a0408; }
+@media (max-width: 860px) { .season-select { margin: 10px 0 0; padding: 0 2px; } }
+
+/* ----------------------------- Standings -------------------------------- */
+.standings-group { margin-bottom: 42px; }
+.standings-group__title { margin-bottom: 20px; }
+.standings-wrap { padding: 4px 0; overflow-x: auto; }
+.standings { width: 100%; border-collapse: collapse; min-width: 580px; }
+.standings th { text-align: center; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); padding: 13px 8px; border-bottom: 1px solid var(--line); font-weight: 700; }
+.standings td { text-align: center; padding: 12px 8px; border-bottom: 1px solid var(--line); color: var(--ink-soft); }
+.standings tr:last-child td { border-bottom: none; }
+.standings__pos { width: 36px; color: var(--muted); font-weight: 700; }
+.standings__team { text-align: left; font-weight: 600; color: var(--ink); }
+.standings__team { display: flex; align-items: center; gap: 11px; }
+.standings__crest { width: 26px; height: 26px; display: grid; place-items: center; flex: none; }
+.standings__crest img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.standings__crest-fallback { width: 24px; height: 24px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); display: grid; place-items: center; font-size: 0.72rem; font-weight: 800; color: var(--red-300); }
+.standings__gd { white-space: nowrap; }
+.standings__pts { font-weight: 800; color: var(--gold); }
+.standings__tr { width: 30px; }
+.standings tr.is-us { background: linear-gradient(90deg, rgba(224, 38, 60, 0.2), rgba(224, 38, 60, 0.04)); }
+.standings tr.is-us .standings__team { color: #fff; }
+.standings tr.is-us td { border-color: rgba(255, 207, 92, 0.25); }
+.trend { font-size: 0.68rem; }
+.trend--up { color: #28c07a; }
+.trend--down { color: var(--red-300); }
+.trend--same { color: rgba(255, 255, 255, 0.28); }
+.standings-legend { margin-top: 14px; font-size: 0.82rem; }

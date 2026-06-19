@@ -16,6 +16,7 @@ const statsSchema = new mongoose.Schema(
 const playerSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
+    season: { type: String, default: '', index: true },
     position: { type: String, enum: POSITIONS, required: true },
     shirtNumber: { type: Number, min: 1, max: 99 },
     birthdate: { type: Date },

@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import Logo from '../../components/Logo.jsx';
 import {
-  IconDashboard, IconNewspaper, IconUsers, IconCalendar, IconShield,
+  IconDashboard, IconNewspaper, IconUsers, IconCalendar, IconShield, IconTable,
   IconExternal, IconLogout, IconMenu, IconUser,
 } from '../../components/icons.jsx';
 
@@ -12,6 +12,7 @@ const NAV = [
   { to: '/admin/news', label: 'Novice', Icon: IconNewspaper },
   { to: '/admin/players', label: 'Igralci', Icon: IconUsers },
   { to: '/admin/matches', label: 'Tekme', Icon: IconCalendar },
+  { to: '/admin/standings', label: 'Lestvica', Icon: IconTable },
   { to: '/admin/club', label: 'Podatki kluba', Icon: IconShield },
 ];
 

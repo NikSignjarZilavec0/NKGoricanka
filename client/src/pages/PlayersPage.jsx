@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { playersApi } from '../api/services.js';
 import { POSITION_GROUPS } from '../utils/format.js';
+import { useSeason } from '../context/SeasonContext.jsx';
 import PlayerCard from '../components/PlayerCard.jsx';
 import PageHeader from '../components/PageHeader.jsx';
 import Loader from '../components/Loader.jsx';
@@ -8,13 +9,15 @@ import EmptyState from '../components/EmptyState.jsx';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
 
 export default function PlayersPage() {
+  const { season } = useSeason();
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   useDocumentTitle('Igralski kader');
 
   useEffect(() => {
-    playersApi.list().then(setPlayers).catch(() => setPlayers([])).finally(() => setLoading(false));
-  }, []);
+    setLoading(true);
+    playersApi.list(season).then(setPlayers).catch(() => setPlayers([])).finally(() => setLoading(false));
+  }, [season]);
 
   return (
     <>

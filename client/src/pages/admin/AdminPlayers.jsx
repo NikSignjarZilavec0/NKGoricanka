@@ -2,17 +2,20 @@ import { useEffect, useState } from 'react';
 import { playersApi } from '../../api/services.js';
 import { imageUrl, errMessage } from '../../api/client.js';
 import { POSITION_LABELS, POSITION_GROUPS, toDateInput } from '../../utils/format.js';
+import { useSeason } from '../../context/SeasonContext.jsx';
 import Modal from '../../components/Modal.jsx';
 import Loader from '../../components/Loader.jsx';
 import useDocumentTitle from '../../hooks/useDocumentTitle.js';
 
 const EMPTY = {
-  name: '', position: 'midfielder', shirtNumber: '', birthdate: '', heightCm: '',
+  name: '', season: '', position: 'midfielder', shirtNumber: '', birthdate: '', heightCm: '',
   nationality: 'Slovenija', bio: '', active: true,
   appearances: 0, goals: 0, assists: 0, yellowCards: 0, redCards: 0,
 };
 
 export default function AdminPlayers() {
+  const { current, seasons } = useSeason();
+  const [adminSeason, setAdminSeason] = useState('');
   const [items, setItems] = useState(null);
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -22,14 +25,15 @@ export default function AdminPlayers() {
   const [saving, setSaving] = useState(false);
   useDocumentTitle('Igralci — Admin');
 
-  const load = () => playersApi.list().then(setItems).catch(() => setItems([]));
-  useEffect(() => { load(); }, []);
+  useEffect(() => { if (!adminSeason && current) setAdminSeason(current); }, [current, adminSeason]);
+  const load = () => playersApi.list(adminSeason).then(setItems).catch(() => setItems([]));
+  useEffect(() => { if (adminSeason) { setItems(null); load(); } }, [adminSeason]);
 
-  const openNew = () => { setEditing(null); setForm(EMPTY); setFile(null); setError(''); setModal(true); };
+  const openNew = () => { setEditing(null); setForm({ ...EMPTY, season: adminSeason }); setFile(null); setError(''); setModal(true); };
   const openEdit = (p) => {
     setEditing(p); setFile(null); setError('');
     setForm({
-      name: p.name || '', position: p.position, shirtNumber: p.shirtNumber ?? '',
+      name: p.name || '', season: p.season || '', position: p.position, shirtNumber: p.shirtNumber ?? '',
       birthdate: toDateInput(p.birthdate), heightCm: p.heightCm ?? '',
       nationality: p.nationality || 'Slovenija', bio: p.bio || '', active: p.active !== false,
       appearances: p.stats?.appearances ?? 0, goals: p.stats?.goals ?? 0, assists: p.stats?.assists ?? 0,
@@ -48,7 +52,7 @@ export default function AdminPlayers() {
     setSaving(true); setError('');
     try {
       const fd = new FormData();
-      ['name', 'position', 'shirtNumber', 'birthdate', 'heightCm', 'nationality', 'bio', 'active']
+      ['name', 'season', 'position', 'shirtNumber', 'birthdate', 'heightCm', 'nationality', 'bio', 'active']
         .forEach((k) => fd.append(k, form[k]));
       fd.append('stats', JSON.stringify({
         appearances: Number(form.appearances) || 0, goals: Number(form.goals) || 0,
@@ -78,8 +82,13 @@ export default function AdminPlayers() {
   return (
     <>
       <div className="admin-page-head admin-page-head--row">
-        <div><h1>Igralci</h1><p className="text-muted">{items.length} v kadru</p></div>
-        <button className="btn btn--primary" onClick={openNew}>+ Nov igralec</button>
+        <div><h1>Igralci</h1><p className="text-muted">{items.length} v kadru · sezona {adminSeason}</p></div>
+        <div className="row">
+          <input className="input" style={{ width: 130 }} list="seasons-pl" value={adminSeason}
+            onChange={(e) => setAdminSeason(e.target.value)} placeholder="Sezona" />
+          <datalist id="seasons-pl">{(seasons || []).map((s) => <option key={s} value={s} />)}</datalist>
+          <button className="btn btn--primary" onClick={openNew}>+ Nov igralec</button>
+        </div>
       </div>
 
       {POSITION_GROUPS.map((g) => {
@@ -122,6 +131,10 @@ export default function AdminPlayers() {
               <select className="select" name="position" value={form.position} onChange={onChange}>
                 {Object.entries(POSITION_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
+            </div>
+            <div className="field" style={{ flex: 1 }}>
+              <label>Sezona</label>
+              <input className="input" name="season" value={form.season} onChange={onChange} placeholder="2025/26" />
             </div>
           </div>
           <div className="row">

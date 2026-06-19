@@ -19,15 +19,27 @@ export const newsApi = {
 };
 
 export const playersApi = {
-  list: () => api.get('/players').then((r) => r.data),
+  list: (season) => api.get('/players', { params: season ? { season } : {} }).then((r) => r.data),
   getById: (id) => api.get(`/players/${id}`).then((r) => r.data),
   create: (formData) => api.post('/players', formData, fd()).then((r) => r.data),
   update: (id, formData) => api.put(`/players/${id}`, formData, fd()).then((r) => r.data),
   remove: (id) => api.delete(`/players/${id}`).then((r) => r.data),
 };
 
+export const standingsApi = {
+  list: (season) => api.get('/standings', { params: season ? { season } : {} }).then((r) => r.data),
+  create: (formData) => api.post('/standings', formData, fd()).then((r) => r.data),
+  update: (id, formData) => api.put(`/standings/${id}`, formData, fd()).then((r) => r.data),
+  remove: (id) => api.delete(`/standings/${id}`).then((r) => r.data),
+};
+
+export const seasonsApi = {
+  get: () => api.get('/seasons').then((r) => r.data),
+};
+
 export const matchesApi = {
-  list: (status) => api.get('/matches', { params: status ? { status } : {} }).then((r) => r.data),
+  list: (status, season) =>
+    api.get('/matches', { params: { ...(status ? { status } : {}), ...(season ? { season } : {}) } }).then((r) => r.data),
   getById: (id) => api.get(`/matches/${id}`).then((r) => r.data),
   create: (formData) => api.post('/matches', formData, fd()).then((r) => r.data),
   update: (id, formData) => api.put(`/matches/${id}`, formData, fd()).then((r) => r.data),

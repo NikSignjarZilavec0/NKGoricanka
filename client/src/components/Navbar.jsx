@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import Logo from './Logo.jsx';
+import SeasonSelect from './SeasonSelect.jsx';
 import { useClub } from '../context/ClubContext.jsx';
 
 const LINKS = [
@@ -8,6 +9,7 @@ const LINKS = [
   { to: '/news', label: 'Novice' },
   { to: '/players', label: 'Kader' },
   { to: '/matches', label: 'Tekme' },
+  { to: '/standings', label: 'Lestvica' },
   { to: '/about', label: 'O klubu' },
 ];
 
@@ -48,6 +50,7 @@ export default function Navbar() {
               {l.label}
             </NavLink>
           ))}
+          <SeasonSelect />
         </nav>
       </div>
     </header>

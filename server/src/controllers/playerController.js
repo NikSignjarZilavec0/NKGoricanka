@@ -20,7 +20,7 @@ function parseStats(body) {
 
 function buildFields(body, file) {
   const fields = {};
-  ['name', 'position', 'bio', 'nationality'].forEach((k) => {
+  ['name', 'position', 'bio', 'nationality', 'season'].forEach((k) => {
     if (body[k] !== undefined) fields[k] = body[k];
   });
   if (body.shirtNumber !== undefined && body.shirtNumber !== '')
@@ -39,7 +39,9 @@ function buildFields(body, file) {
 export async function list(req, res, next) {
   try {
     const order = { goalkeeper: 0, defender: 1, midfielder: 2, forward: 3 };
-    const players = await Player.find().lean();
+    const filter = {};
+    if (req.query.season) filter.season = req.query.season;
+    const players = await Player.find(filter).lean();
     players.sort(
       (a, b) =>
         (order[a.position] ?? 9) - (order[b.position] ?? 9) ||

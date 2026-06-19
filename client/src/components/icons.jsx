@@ -122,6 +122,13 @@ export const IconBall = (p) => (
   </Svg>
 );
 
+export const IconTable = (p) => (
+  <Svg {...p}>
+    <rect x="3" y="4" width="18" height="16" rx="2" />
+    <path d="M3 9h18M3 14.5h18M9 4v16" />
+  </Svg>
+);
+
 export const IconInbox = (p) => (
   <Svg {...p}>
     <path d="M22 12h-5l-2 3h-6l-2-3H2" />

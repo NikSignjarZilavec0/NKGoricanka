@@ -1,5 +1,27 @@
 import ClubInfo from '../models/ClubInfo.js';
+import Match from '../models/Match.js';
+import Player from '../models/Player.js';
+import Standing from '../models/Standing.js';
 import { publicPath } from '../middleware/upload.js';
+
+/** Public: distinct seasons across the site + the current/default season. */
+export async function seasons(req, res, next) {
+  try {
+    const info = await getClubInfo();
+    const sets = await Promise.all([
+      Match.distinct('season'),
+      Player.distinct('season'),
+      Standing.distinct('season'),
+    ]);
+    const all = new Set(sets.flat().filter(Boolean));
+    if (info.currentSeason) all.add(info.currentSeason);
+    // newest first (string sort works for "YYYY/YY")
+    const list = [...all].sort().reverse();
+    res.json({ seasons: list, current: info.currentSeason || list[0] || '' });
+  } catch (err) {
+    next(err);
+  }
+}
 
 /** Always return the singleton, creating an empty one if needed. */
 export async function getClubInfo() {
@@ -24,7 +46,7 @@ export async function update(req, res, next) {
     const info = await getClubInfo();
     const b = req.body;
 
-    ['name', 'shortName', 'history', 'address', 'email', 'phone', 'mapEmbedUrl'].forEach((k) => {
+    ['name', 'shortName', 'history', 'address', 'email', 'phone', 'mapEmbedUrl', 'currentSeason'].forEach((k) => {
       if (b[k] !== undefined) info[k] = b[k];
     });
     if (b.foundedYear !== undefined && b.foundedYear !== '')

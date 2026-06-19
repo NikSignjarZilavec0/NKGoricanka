@@ -10,12 +10,14 @@ import EmptyState from '../components/EmptyState.jsx';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
 import useMatchStream from '../hooks/useMatchStream.js';
 import Logo from '../components/Logo.jsx';
+import { useSeason } from '../context/SeasonContext.jsx';
 
 const byDateAsc = (a, b) => new Date(a.date) - new Date(b.date);
 const byDateDesc = (a, b) => new Date(b.date) - new Date(a.date);
 
 export default function HomePage() {
   const { club } = useClub();
+  const { season } = useSeason();
   const [news, setNews] = useState([]);
   const [m, setM] = useState({ live: [], upcoming: [], finished: [] });
   const [loading, setLoading] = useState(true);
@@ -23,18 +25,19 @@ export default function HomePage() {
   useDocumentTitle('NK Goričanka — uradna spletna stran');
 
   useEffect(() => {
+    setLoading(true);
     Promise.all([
       newsApi.listPublished().catch(() => []),
-      matchesApi.list('live').catch(() => []),
-      matchesApi.list('upcoming').catch(() => []),
-      matchesApi.list('finished').catch(() => []),
+      matchesApi.list('live', season).catch(() => []),
+      matchesApi.list('upcoming', season).catch(() => []),
+      matchesApi.list('finished', season).catch(() => []),
     ])
       .then(([n, live, upcoming, finished]) => {
         setNews(n.slice(0, 4));
         setM({ live, upcoming, finished });
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [season]);
 
   useMatchStream((match) => {
     setM((d) => {

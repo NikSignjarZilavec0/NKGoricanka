@@ -20,6 +20,7 @@ export default function AdminClub() {
     clubApi.get().then((c) => {
       setForm({
         name: c.name || '', shortName: c.shortName || '', foundedYear: c.foundedYear || '',
+        currentSeason: c.currentSeason || '2025/26',
         history: c.history || '', address: c.address || '', email: c.email || '', phone: c.phone || '',
         primary: c.colors?.primary || '#c8102e', accent: c.colors?.accent || '#ffcc00',
         facebook: c.socialLinks?.facebook || '', instagram: c.socialLinks?.instagram || '',
@@ -53,7 +54,7 @@ export default function AdminClub() {
     setSaving(true); setMsg(null);
     try {
       const fd = new FormData();
-      ['name', 'shortName', 'foundedYear', 'history', 'address', 'email', 'phone', 'mapEmbedUrl', 'latitude', 'longitude']
+      ['name', 'shortName', 'foundedYear', 'currentSeason', 'history', 'address', 'email', 'phone', 'mapEmbedUrl', 'latitude', 'longitude']
         .forEach((k) => fd.append(k, form[k]));
       fd.append('colors', JSON.stringify({ primary: form.primary, accent: form.accent }));
       fd.append('socialLinks', JSON.stringify({
@@ -89,6 +90,8 @@ export default function AdminClub() {
             <input className="input" name="shortName" value={form.shortName} onChange={onChange} /></div>
           <div className="field" style={{ flex: 1 }}><label>Leto ustanovitve</label>
             <input className="input" type="number" name="foundedYear" value={form.foundedYear} onChange={onChange} /></div>
+          <div className="field" style={{ flex: 1 }}><label>Trenutna sezona (privzeto na strani)</label>
+            <input className="input" name="currentSeason" value={form.currentSeason} onChange={onChange} placeholder="2025/26" /></div>
         </div>
 
         <div className="field"><label>Zgodovina</label>

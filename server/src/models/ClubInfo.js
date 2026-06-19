@@ -6,6 +6,7 @@ const clubInfoSchema = new mongoose.Schema(
     key: { type: String, default: 'singleton', unique: true, immutable: true },
     name: { type: String, default: 'NK Goričanka' },
     shortName: { type: String, default: 'Goričanka' },
+    currentSeason: { type: String, default: '2025/26' }, // default season shown publicly
     foundedYear: { type: Number },
     history: { type: String, default: '' },
     address: { type: String, default: '' },

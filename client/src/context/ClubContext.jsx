@@ -22,10 +22,18 @@ export function ClubProvider({ children }) {
     refresh();
   }, [refresh]);
 
-  // Apply the club's primary colour to the document so admin changes take effect
-  // live. (The palette is red-only by design — the accent colour is not used.)
+  // Apply the club's primary colour + favicon (use the uploaded grb if set) so
+  // admin changes take effect live.
   useEffect(() => {
     if (club?.colors?.primary) document.documentElement.style.setProperty('--red', club.colors.primary);
+    const icon = document.querySelector("link[rel='icon']");
+    if (icon) {
+      const href = club?.logo
+        ? (/^https?:\/\//i.test(club.logo) ? club.logo : (club.logo.startsWith('/') ? club.logo : `/${club.logo}`))
+        : '/logo.svg';
+      icon.setAttribute('href', href);
+      icon.setAttribute('type', href.endsWith('.svg') ? 'image/svg+xml' : 'image/png');
+    }
   }, [club]);
 
   return (

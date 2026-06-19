@@ -6,13 +6,14 @@ import Loader from '../components/Loader.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
 import useMatchStream from '../hooks/useMatchStream.js';
-import { useSeason } from '../context/SeasonContext.jsx';
+import { usePageSeason } from '../context/SeasonContext.jsx';
+import SeasonSelect from '../components/SeasonSelect.jsx';
 
 const byDateAsc = (a, b) => new Date(a.date) - new Date(b.date);
 const byDateDesc = (a, b) => new Date(b.date) - new Date(a.date);
 
 export default function MatchesPage() {
-  const { season } = useSeason();
+  const { season, setSeason, seasons } = usePageSeason();
   const [tab, setTab] = useState('upcoming');
   const [data, setData] = useState({ live: null, upcoming: null, finished: null });
   const [loading, setLoading] = useState(true);
@@ -46,7 +47,9 @@ export default function MatchesPage() {
 
   return (
     <>
-      <PageHeader title="Tekme" subtitle="Razpored prihajajočih tekem in rezultati odigranih" />
+      <PageHeader title="Tekme">
+        <SeasonSelect value={season} onChange={setSeason} seasons={seasons} includeAll />
+      </PageHeader>
       <section className="section">
         <div className="container">
           {loading ? (

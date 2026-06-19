@@ -336,14 +336,15 @@
 
 /* ----------------------- Home hero (team photo) ------------------------- */
 .home-hero {
-  position: relative; overflow: hidden; min-height: 380px; color: #fff; text-align: center;
+  position: relative; overflow: hidden; min-height: 640px; color: #fff; text-align: center;
   display: flex; align-items: center; justify-content: center;
   background:
     radial-gradient(70% 120% at 80% -20%, var(--red-400), transparent 55%),
     radial-gradient(40% 70% at 92% 5%, rgba(255, 207, 92, 0.18), transparent 60%),
     linear-gradient(150deg, var(--red-600), var(--red-800) 60%, var(--red-900));
 }
-.home-hero__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.home-hero__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 25%; }
+@media (max-width: 600px) { .home-hero { min-height: 460px; } }
 .home-hero__overlay {
   position: absolute; inset: 0;
   background:
@@ -418,12 +419,36 @@
 .live-scorer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; border-radius: 12px; background: var(--glass); border: 1px solid var(--glass-border); margin-bottom: 8px; }
 .live-panel__foot { text-align: center; margin: 14px 0; font-size: 0.88rem; }
 
-/* ---------------------- Season select (navbar) ------------------------- */
-.season-select { display: inline-flex; align-items: center; gap: 7px; margin-left: 14px; }
-.season-select__label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.09em; color: rgba(255, 255, 255, 0.55); font-weight: 700; }
-.season-select__input { background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 0.85rem; cursor: pointer; }
-.season-select__input option { color: #1a0408; }
-@media (max-width: 860px) { .season-select { margin: 10px 0 0; padding: 0 2px; } }
+/* -------------------- Page header layout + season pick ------------------ */
+.page-header__inner { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.page-header__aside { display: flex; align-items: center; gap: 10px; padding-bottom: 2px; }
+.season-pick { display: inline-flex; align-items: center; gap: 8px; }
+.season-pick__label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.09em; color: rgba(255, 255, 255, 0.7); font-weight: 700; }
+.season-pick__input { background: rgba(255, 255, 255, 0.12); color: #fff; border: 1px solid rgba(255, 255, 255, 0.28); border-radius: 999px; padding: 7px 14px; font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+.season-pick__input option { color: #1a0408; }
+
+/* ----------------------------- Squad table ------------------------------ */
+.squad-group { margin-bottom: 40px; }
+.squad-group__title { margin-bottom: 18px; }
+.squad-wrap { padding: 4px 0; overflow-x: auto; }
+.squad { width: 100%; border-collapse: collapse; min-width: 560px; }
+.squad th { text-align: center; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); padding: 13px 10px; border-bottom: 1px solid var(--line); font-weight: 700; }
+.squad td { text-align: center; padding: 10px; border-bottom: 1px solid var(--line); color: var(--ink-soft); font-weight: 600; }
+.squad tbody tr:last-child td { border-bottom: none; }
+.squad__player { text-align: left !important; min-width: 220px; }
+.squad__row { cursor: pointer; transition: background var(--transition); }
+.squad__row:hover, .squad__row:focus-visible { background: linear-gradient(90deg, rgba(224, 38, 60, 0.16), rgba(224, 38, 60, 0.03)); outline: none; }
+.squad__row:hover .squad__name { color: #fff; }
+.squad td.squad__player { display: flex; align-items: center; gap: 12px; }
+.squad__avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex: none; background: rgba(255, 255, 255, 0.08); display: grid; place-items: center; }
+.squad__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.squad__avatar-fb { font-size: 0.82rem; font-weight: 800; color: var(--red-300); }
+.squad__num { font-weight: 800; color: var(--gold); min-width: 1.6em; text-align: center; font-size: 0.95rem; }
+.squad__name { color: var(--ink); font-weight: 700; }
+.squad__card { width: 54px; }
+.kard { display: inline-block; width: 13px; height: 17px; border-radius: 2px; vertical-align: middle; }
+.kard--y { background: #f4c430; }
+.kard--r { background: var(--red-400); }
 
 /* ----------------------------- Standings -------------------------------- */
 .standings-group { margin-bottom: 42px; }

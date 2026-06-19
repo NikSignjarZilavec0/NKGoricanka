@@ -12,7 +12,7 @@ export default function AboutPage() {
 
   return (
     <>
-      <PageHeader title="O klubu" subtitle={club?.name || 'NK Goričanka'} />
+      <PageHeader title="O klubu" />
 
       <section className="section">
         <div className="container about-grid">

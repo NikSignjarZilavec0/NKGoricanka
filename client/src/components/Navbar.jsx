@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import Logo from './Logo.jsx';
-import SeasonSelect from './SeasonSelect.jsx';
 import { useClub } from '../context/ClubContext.jsx';
 
 const LINKS = [
@@ -25,7 +24,6 @@ export default function Navbar() {
           <Logo size={46} />
           <span className="navbar__brand-text">
             <strong>{club?.name || 'NK Goričanka'}</strong>
-            <small>{club?.foundedYear ? `od ${club.foundedYear}` : 'Nogometni klub'}</small>
           </span>
         </Link>
 
@@ -50,7 +48,6 @@ export default function Navbar() {
               {l.label}
             </NavLink>
           ))}
-          <SeasonSelect />
         </nav>
       </div>
     </header>

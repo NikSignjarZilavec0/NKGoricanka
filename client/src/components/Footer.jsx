@@ -64,7 +64,6 @@ export default function Footer() {
       <div className="footer__bar">
         <div className="container footer__bar-inner">
           <span>© {year} {club?.name || 'NK Goričanka'}. Vse pravice pridržane.</span>
-          <span className="footer__muted">Spletna stran je v izdelavi — vsebina je delno demonstracijska.</span>
         </div>
       </div>
     </footer>

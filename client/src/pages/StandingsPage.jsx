@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { standingsApi } from '../api/services.js';
 import { imageUrl } from '../api/client.js';
-import { useSeason } from '../context/SeasonContext.jsx';
+import { usePageSeason } from '../context/SeasonContext.jsx';
 import { useClub } from '../context/ClubContext.jsx';
+import SeasonSelect from '../components/SeasonSelect.jsx';
 import PageHeader from '../components/PageHeader.jsx';
 import Loader from '../components/Loader.jsx';
 import EmptyState from '../components/EmptyState.jsx';
@@ -15,7 +16,7 @@ function trendMark(t) {
 }
 
 export default function StandingsPage() {
-  const { season } = useSeason();
+  const { season, setSeason, seasons } = usePageSeason();
   const { club } = useClub();
   const [rows, setRows] = useState(null);
   useDocumentTitle('Lestvica');
@@ -39,7 +40,9 @@ export default function StandingsPage() {
 
   return (
     <>
-      <PageHeader title="Lestvica" subtitle={season ? `Sezona ${season}` : 'Razvrstitev ekip'} />
+      <PageHeader title="Lestvica" subtitle={season ? `Sezona ${season}` : 'Razvrstitev ekip'}>
+        <SeasonSelect value={season} onChange={setSeason} seasons={seasons} />
+      </PageHeader>
       <section className="section">
         <div className="container">
           {!rows ? (

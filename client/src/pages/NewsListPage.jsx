@@ -17,13 +17,13 @@ export default function NewsListPage() {
 
   return (
     <>
-      <PageHeader title="Novice" subtitle="Najnovejše iz kluba NK Goričanka" />
+      <PageHeader title="Novice" />
       <section className="section">
         <div className="container">
           {loading ? (
             <Loader />
           ) : news.length === 0 ? (
-            <EmptyState title="Še ni novic" text="Novice bodo kmalu na voljo." />
+            <EmptyState title="Ni novic" text="Novice bodo kmalu na voljo." />
           ) : (
             <div className="grid grid--3">
               {news.map((n) => <NewsCard key={n._id} item={n} />)}

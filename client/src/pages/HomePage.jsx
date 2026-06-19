@@ -17,7 +17,7 @@ const byDateDesc = (a, b) => new Date(b.date) - new Date(a.date);
 
 export default function HomePage() {
   const { club } = useClub();
-  const { season } = useSeason();
+  const { current: season } = useSeason();
   const [news, setNews] = useState([]);
   const [m, setM] = useState({ live: [], upcoming: [], finished: [] });
   const [loading, setLoading] = useState(true);
@@ -79,7 +79,7 @@ export default function HomePage() {
             <div className="home-col">
               <h2 className="section-title">Novice</h2>
               {news.length === 0 ? (
-                <EmptyState title="Še ni novic" text="Novice bodo kmalu na voljo." />
+                <EmptyState title="Ni novic" text="Novice bodo kmalu na voljo." />
               ) : (
                 <div className="home-col__list">
                   {news.map((n) => <NewsCard key={n._id} item={n} />)}

@@ -220,10 +220,7 @@ function RosterTable({ title, rows, backTo }) {
             <tr>
               <th className="squad__rank">#</th>
               <th className="squad__player">Igralec</th>
-              <th title="Goli">Goli</th>
-              <th title="Asistence">Asist.</th>
-              <th className="squad__card" title="Rumeni kartoni"><span className="kard kard--y" /></th>
-              <th className="squad__card" title="Rdeči kartoni"><span className="kard kard--r" /></th>
+              <th className="roster-ev">Dogodki</th>
             </tr>
           </thead>
           <tbody>
@@ -237,10 +234,14 @@ function RosterTable({ title, rows, backTo }) {
                     {r.isGoalkeeper && <span className="roster-badge roster-badge--gk" title="Vratar">GK</span>}
                   </div>
                 </td>
-                <td>{r.g || 0}</td>
-                <td>{r.a || 0}</td>
-                <td className="squad__card">{r.y || 0}</td>
-                <td className="squad__card">{r.r || 0}</td>
+                <td className="roster-ev">
+                  <span className="roster-ev__wrap">
+                    {Array.from({ length: r.g }).map((_, k) => <span key={`g${k}`} className="pev-icon pev-icon--g" title="Gol"><IconBall size={15} /></span>)}
+                    {Array.from({ length: r.a }).map((_, k) => <span key={`a${k}`} className="pev-icon pev-icon--a" title="Asistenca">A</span>)}
+                    {Array.from({ length: r.y }).map((_, k) => <span key={`y${k}`} className="kard kard--y" title="Rumeni karton" />)}
+                    {Array.from({ length: r.r }).map((_, k) => <span key={`r${k}`} className="kard kard--r" title="Rdeči karton" />)}
+                  </span>
+                </td>
               </tr>
             ))}
           </tbody>

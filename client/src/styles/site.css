@@ -586,6 +586,9 @@
 .subs__min { min-width: 34px; color: var(--gold); font-weight: 800; font-size: 0.85rem; }
 .subs__in { color: #4bd998; font-weight: 700; }
 .subs__out { color: var(--red-300); }
+.roster-ev { text-align: right !important; }
+.roster-ev__wrap { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; flex-wrap: wrap; }
+.roster-ev__wrap .kard { width: 12px; height: 16px; }
 
 /* ------------------------------ Lineup pitch ---------------------------- */
 .pitch {

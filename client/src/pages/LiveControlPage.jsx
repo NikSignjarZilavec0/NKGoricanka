@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
-import { matchesApi } from '../api/services.js';
+import { matchesApi, playersApi } from '../api/services.js';
 import { errMessage } from '../api/client.js';
 import { useClub } from '../context/ClubContext.jsx';
 import Loader from '../components/Loader.jsx';
@@ -26,6 +26,7 @@ export default function LiveControlPage() {
   const [msg, setMsg] = useState(null);
   const [scorerName, setScorerName] = useState('');
   const [scorerMin, setScorerMin] = useState('');
+  const [players, setPlayers] = useState([]);
 
   useDocumentTitle('Živo upravljanje');
 
@@ -43,6 +44,7 @@ export default function LiveControlPage() {
       })
       .catch((e) => setMsg({ type: 'error', text: errMessage(e, 'Tekma ni najdena.') }))
       .finally(() => setLoading(false));
+    playersApi.list().then(setPlayers).catch(() => setPlayers([]));
   }, [id]);
 
   const push = async (next) => {
@@ -135,8 +137,11 @@ export default function LiveControlPage() {
                 onClick={() => push({ ...state, scorers: state.scorers.filter((_, idx) => idx !== i) })}>Odstrani</button>
             </div>
           ))}
+          <datalist id="live-player-names">
+            {players.map((p) => <option key={p._id} value={p.name} />)}
+          </datalist>
           <div className="row" style={{ marginTop: 10, flexWrap: 'nowrap' }}>
-            <input className="input" style={{ flex: 2 }} placeholder="Ime strelca" value={scorerName} onChange={(e) => setScorerName(e.target.value)} />
+            <input className="input" style={{ flex: 2 }} list="live-player-names" placeholder="Ime strelca" value={scorerName} onChange={(e) => setScorerName(e.target.value)} />
             <input className="input" style={{ flex: 1 }} type="number" min="1" max="130" placeholder="min." value={scorerMin} onChange={(e) => setScorerMin(e.target.value)} />
             <button className="btn btn--primary btn--sm" disabled={saving || !scorerName.trim()}
               onClick={() => { push({ ...state, scorers: [...state.scorers, { playerName: scorerName.trim(), minute: scorerMin }] }); setScorerName(''); setScorerMin(''); }}>

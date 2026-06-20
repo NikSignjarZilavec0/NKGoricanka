@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { matchesApi } from '../../api/services.js';
-import { errMessage } from '../../api/client.js';
+import { matchesApi, playersApi } from '../../api/services.js';
+import { errMessage, copyToClipboard } from '../../api/client.js';
 import { formatDateTime, STATUS_LABELS, toDateTimeInput } from '../../utils/format.js';
 import Modal from '../../components/Modal.jsx';
 import Loader from '../../components/Loader.jsx';
@@ -13,6 +13,7 @@ const EMPTY = {
 
 export default function AdminMatches() {
   const [items, setItems] = useState(null);
+  const [players, setPlayers] = useState([]);
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY);
@@ -26,7 +27,10 @@ export default function AdminMatches() {
   useDocumentTitle('Tekme — Admin');
 
   const load = () => matchesApi.list().then(setItems).catch(() => setItems([]));
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    playersApi.list().then(setPlayers).catch(() => setPlayers([]));
+  }, []);
 
   const openLive = async (m) => {
     setLiveBusy(true);
@@ -41,7 +45,9 @@ export default function AdminMatches() {
     }
   };
   const copyLive = async () => {
-    try { await navigator.clipboard.writeText(liveInfo.liveUrl); setCopied(true); } catch { /* ignore */ }
+    const ok = await copyToClipboard(liveInfo.liveUrl);
+    if (ok) setCopied(true);
+    else window.prompt('Kopiraj povezavo ročno (Ctrl+C):', liveInfo.liveUrl);
   };
 
   const openNew = () => { setEditing(null); setForm(EMPTY); setScorers([]); setFile(null); setError(''); setModal(true); };
@@ -135,6 +141,9 @@ export default function AdminMatches() {
       <Modal open={modal} title={editing ? 'Uredi tekmo' : 'Nova tekma'} onClose={() => setModal(false)} wide>
         <form onSubmit={onSubmit}>
           {error && <div className="alert alert--error">{error}</div>}
+          <datalist id="player-names">
+            {players.map((p) => <option key={p._id} value={p.name} />)}
+          </datalist>
           <div className="row">
             <div className="field" style={{ flex: 2 }}><label>Nasprotnik *</label>
               <input className="input" name="opponent" value={form.opponent} onChange={onChange} required /></div>
@@ -175,7 +184,7 @@ export default function AdminMatches() {
               {scorers.length === 0 && <p className="text-muted">Ni vnesenih strelcev.</p>}
               {scorers.map((s, i) => (
                 <div className="row scorer-row" key={i}>
-                  <input className="input" style={{ flex: 2 }} placeholder="Ime strelca" value={s.playerName} onChange={(e) => updateScorer(i, 'playerName', e.target.value)} />
+                  <input className="input" style={{ flex: 2 }} list="player-names" placeholder="Ime strelca" value={s.playerName} onChange={(e) => updateScorer(i, 'playerName', e.target.value)} />
                   <input className="input" style={{ flex: 1 }} type="number" min="1" max="130" placeholder="min." value={s.minute} onChange={(e) => updateScorer(i, 'minute', e.target.value)} />
                   <button type="button" className="btn btn--sm admin-del" onClick={() => removeScorer(i)}>✕</button>
                 </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { matchesApi } from '../api/services.js';
+import { matchesApi, playersApi } from '../api/services.js';
 import { imageUrl, errMessage } from '../api/client.js';
 import { formatDateTime, STATUS_LABELS } from '../utils/format.js';
 import { useClub } from '../context/ClubContext.jsx';
@@ -14,13 +14,19 @@ export default function MatchDetailPage() {
   const { id } = useParams();
   const { club } = useClub();
   const [match, setMatch] = useState(null);
+  const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     setLoading(true);
     matchesApi.getById(id).then(setMatch).catch((e) => setError(errMessage(e))).finally(() => setLoading(false));
+    playersApi.list().then(setPlayers).catch(() => setPlayers([]));
   }, [id]);
+
+  // Resolve a scorer name to a player id (case-insensitive exact name match).
+  const playerByName = new Map(players.map((p) => [p.name.trim().toLowerCase(), p._id]));
+  const playerIdFor = (name) => playerByName.get((name || '').trim().toLowerCase());
 
   // Real-time updates
   useMatchStream((m) => { if (m._id === id) setMatch(m); });
@@ -88,9 +94,18 @@ export default function MatchDetailPage() {
             <h2 className="section-title">Strelci</h2>
             {match.scorers?.length > 0 ? (
               <ul className="scorer-list">
-                {match.scorers.map((s, i) => (
-                  <li key={i}><IconBall /> <strong>{s.playerName}</strong>{s.minute ? <span className="scorer-list__min">{s.minute}'</span> : null}</li>
-                ))}
+                {match.scorers.map((s, i) => {
+                  const pid = playerIdFor(s.playerName);
+                  return (
+                    <li key={i}>
+                      <IconBall />{' '}
+                      {pid
+                        ? <Link to={`/players/${pid}`} className="scorer-list__link"><strong>{s.playerName}</strong></Link>
+                        : <strong>{s.playerName}</strong>}
+                      {s.minute ? <span className="scorer-list__min">{s.minute}'</span> : null}
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p className="text-muted">Ni vpisanih strelcev.</p>

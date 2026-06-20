@@ -18,9 +18,9 @@
 
   --red: var(--red-500); /* ClubContext may override at runtime */
 
-  /* Subtle gold accent */
-  --gold: #ffcf5c;
-  --gold-deep: #e3a92e;
+  /* Club yellow accent */
+  --gold: #ffd42e;
+  --gold-deep: #e6b007;
 
   /* Text (light, on the dark theme) */
   --ink: #f8eef0;

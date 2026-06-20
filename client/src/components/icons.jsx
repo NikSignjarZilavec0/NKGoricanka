@@ -129,6 +129,8 @@ export const IconTable = (p) => (
   </Svg>
 );
 
+export const IconChevronDown = (p) => <Svg {...p}><path d="m6 9 6 6 6-6" /></Svg>;
+
 export const IconInbox = (p) => (
   <Svg {...p}>
     <path d="M22 12h-5l-2 3h-6l-2-3H2" />

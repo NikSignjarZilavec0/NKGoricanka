@@ -424,8 +424,31 @@
 .page-header__aside { display: flex; align-items: center; gap: 10px; padding-bottom: 2px; }
 .season-pick { display: inline-flex; align-items: center; gap: 8px; }
 .season-pick__label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.09em; color: rgba(255, 255, 255, 0.7); font-weight: 700; }
-.season-pick__input { background: rgba(255, 255, 255, 0.12); color: #fff; border: 1px solid rgba(255, 255, 255, 0.28); border-radius: 999px; padding: 7px 14px; font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
-.season-pick__input option { color: #1a0408; }
+.season-pick__box { position: relative; }
+.season-pick__btn {
+  display: inline-flex; align-items: center; gap: 10px; min-width: 122px; justify-content: space-between;
+  background: rgba(255, 255, 255, 0.12); color: #fff; border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px; padding: 7px 14px; font: inherit; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+  transition: var(--transition);
+}
+.season-pick__btn:hover { background: rgba(255, 255, 255, 0.2); border-color: var(--gold); }
+.season-pick__chev { transition: transform var(--transition); flex: none; }
+.season-pick__chev.is-open { transform: rotate(180deg); }
+.season-pick__menu {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 60; margin: 0; padding: 6px; list-style: none;
+  min-width: 160px; border-radius: 14px; border: 1px solid var(--glass-border);
+  background: linear-gradient(160deg, rgba(58, 10, 18, 0.98), rgba(36, 6, 12, 0.98));
+  backdrop-filter: blur(22px) saturate(150%); -webkit-backdrop-filter: blur(22px) saturate(150%);
+  box-shadow: var(--shadow-lg); animation: season-pop 140ms ease;
+}
+@keyframes season-pop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+.season-pick__opt {
+  display: block; width: 100%; text-align: left; padding: 9px 13px; border: none; background: none;
+  color: var(--ink-soft); font: inherit; font-size: 0.88rem; font-weight: 600; border-radius: 9px; cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+.season-pick__opt:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.season-pick__opt.is-active { background: linear-gradient(135deg, var(--red-400), var(--red-600)); color: #fff; }
 
 /* ----------------------------- Squad table ------------------------------ */
 .squad-group { margin-bottom: 40px; }
@@ -449,6 +472,22 @@
 .kard { display: inline-block; width: 13px; height: 17px; border-radius: 2px; vertical-align: middle; }
 .kard--y { background: #f4c430; }
 .kard--r { background: var(--red-400); }
+.squad__rank { width: 38px; color: var(--muted); font-weight: 800; }
+.squad__pos-tag { margin-left: 8px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.squad td.is-sorted, .squad th.is-sorted { color: var(--gold); }
+.squad--ranked td.is-sorted { font-weight: 800; }
+.squad--ranked tbody tr:first-child .squad__rank { color: var(--gold); }
+
+/* Kader sort controls */
+.squad-sort { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-bottom: 24px; }
+.squad-sort__label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700; }
+.squad-sort__btn {
+  padding: 8px 16px; border-radius: 999px; border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.05); color: var(--ink-soft); font: inherit; font-size: 0.85rem; font-weight: 650;
+  cursor: pointer; transition: var(--transition);
+}
+.squad-sort__btn:hover { background: rgba(255, 255, 255, 0.12); color: #fff; border-color: var(--gold); }
+.squad-sort__btn.is-active { background: linear-gradient(135deg, var(--red-400), var(--red-600)); color: #fff; border-color: transparent; }
 
 /* ----------------------------- Standings -------------------------------- */
 .standings-group { margin-bottom: 42px; }

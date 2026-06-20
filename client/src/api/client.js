@@ -21,4 +21,36 @@ export function errMessage(err, fallback = 'Prišlo je do napake.') {
   return err?.response?.data?.error || err?.message || fallback;
 }
 
+/**
+ * Copy text to the clipboard. The async Clipboard API only works in secure
+ * contexts (HTTPS/localhost); the site runs over plain HTTP, so fall back to a
+ * hidden textarea + execCommand. Returns true on success.
+ */
+export async function copyToClipboard(text) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    /* fall through to legacy path */
+  }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '-1000px';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
 export default api;

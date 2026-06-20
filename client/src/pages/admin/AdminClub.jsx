@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { clubApi } from '../../api/services.js';
 import { imageUrl, errMessage } from '../../api/client.js';
 import { useClub } from '../../context/ClubContext.jsx';
+import { useSeason } from '../../context/SeasonContext.jsx';
 import Loader from '../../components/Loader.jsx';
 import useDocumentTitle from '../../hooks/useDocumentTitle.js';
 
 export default function AdminClub() {
   const { refresh } = useClub();
+  const { seasons, refresh: refreshSeasons } = useSeason();
   const [form, setForm] = useState(null);
   const [file, setFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState('');
@@ -64,6 +66,7 @@ export default function AdminClub() {
       if (teamFile) fd.append('teamPhoto', teamFile);
       await clubApi.update(fd);
       await refresh();
+      await refreshSeasons();
       setMsg({ type: 'success', text: 'Podatki kluba so shranjeni.' });
     } catch (err) {
       setMsg({ type: 'error', text: errMessage(err, 'Shranjevanje ni uspelo.') });
@@ -90,9 +93,21 @@ export default function AdminClub() {
             <input className="input" name="shortName" value={form.shortName} onChange={onChange} /></div>
           <div className="field" style={{ flex: 1 }}><label>Leto ustanovitve</label>
             <input className="input" type="number" name="foundedYear" value={form.foundedYear} onChange={onChange} /></div>
-          <div className="field" style={{ flex: 1 }}><label>Trenutna sezona (privzeto na strani)</label>
-            <input className="input" name="currentSeason" value={form.currentSeason} onChange={onChange} placeholder="2025/26" /></div>
         </div>
+
+        <h3 className="admin-subhead">Sezone</h3>
+        <div className="row">
+          <div className="field" style={{ flex: 1, minWidth: 220 }}>
+            <label>Trenutna sezona (privzeto na strani)</label>
+            <input className="input" name="currentSeason" list="seasons-list" value={form.currentSeason} onChange={onChange} placeholder="2025/26" />
+            <datalist id="seasons-list">{seasons.map((s) => <option key={s} value={s} />)}</datalist>
+          </div>
+        </div>
+        <p className="text-muted" style={{ marginTop: -4, fontSize: '0.88rem' }}>
+          <strong>Novo sezono (npr. 2026/27) dodaš tako, da jo vpišeš sem</strong> in shraniš — postane privzeta sezona,
+          ki jo obiskovalci vidijo. Nato pri Igralcih, Tekmah in Lestvici vsakemu vnosu nastaviš to sezono.
+          Obstoječe sezone: {seasons.length ? seasons.join(', ') : '—'}.
+        </p>
 
         <div className="field"><label>Zgodovina</label>
           <textarea className="textarea" name="history" value={form.history} onChange={onChange} rows={8} /></div>

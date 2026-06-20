@@ -6,6 +6,7 @@ import { formatDateTime, STATUS_LABELS } from '../utils/format.js';
 import { useClub } from '../context/ClubContext.jsx';
 import useMatchStream from '../hooks/useMatchStream.js';
 import Logo from '../components/Logo.jsx';
+import LineupPitch from '../components/LineupPitch.jsx';
 import Loader from '../components/Loader.jsx';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
 import { IconArrowLeft, IconCalendar, IconMapPin, IconBall } from '../components/icons.jsx';
@@ -119,6 +120,15 @@ export default function MatchDetailPage() {
           </div>
         </div>
       </section>
+
+      {match.lineup?.length > 0 && (
+        <section className="section section--tight">
+          <div className="container">
+            <h2 className="section-title">Postava — {us}</h2>
+            <LineupPitch lineup={match.lineup} scorers={match.scorers || []} />
+          </div>
+        </section>
+      )}
     </>
   );
 }

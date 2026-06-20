@@ -19,6 +19,37 @@ function parseScorers(body) {
   }
 }
 
+function clampPct(v) {
+  const n = Number(v);
+  if (Number.isNaN(n)) return 50;
+  return Math.max(0, Math.min(100, n));
+}
+
+function parseLineup(body) {
+  if (body.lineup === undefined) return undefined;
+  try {
+    const arr = typeof body.lineup === 'string' ? JSON.parse(body.lineup) : body.lineup;
+    if (!Array.isArray(arr)) return [];
+    return arr
+      .filter((s) => s && s.name)
+      .map((s) => ({
+        playerId: s.playerId || null,
+        name: String(s.name).trim(),
+        number: s.number !== undefined && s.number !== '' ? Number(s.number) : undefined,
+        photo: s.photo || '',
+        x: clampPct(s.x),
+        y: clampPct(s.y),
+        isCaptain: Boolean(s.isCaptain),
+        isGoalkeeper: Boolean(s.isGoalkeeper),
+        assists: Number(s.assists) || 0,
+        yellowCards: Number(s.yellowCards) || 0,
+        redCards: Number(s.redCards) || 0,
+      }));
+  } catch {
+    return [];
+  }
+}
+
 function buildFields(body, file) {
   const fields = {};
   ['opponent', 'location', 'competition', 'season', 'status'].forEach((k) => {
@@ -40,6 +71,8 @@ function buildFields(body, file) {
 
   const scorers = parseScorers(body);
   if (scorers !== undefined) fields.scorers = scorers;
+  const lineup = parseLineup(body);
+  if (lineup !== undefined) fields.lineup = lineup;
   if (file) fields.opponentLogo = publicPath(file);
   return fields;
 }

@@ -18,6 +18,25 @@ const scoreSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// One placed player on the lineup pitch (our team). x/y are % of the pitch.
+const lineupSpotSchema = new mongoose.Schema(
+  {
+    playerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Player', default: null },
+    name: { type: String, required: true, trim: true },
+    number: { type: Number, min: 1, max: 99 },
+    photo: { type: String, default: '' },
+    x: { type: Number, min: 0, max: 100, default: 50 },
+    y: { type: Number, min: 0, max: 100, default: 50 },
+    isCaptain: { type: Boolean, default: false },
+    isGoalkeeper: { type: Boolean, default: false },
+    // Per-match annotations shown on the pitch (goals are derived from `scorers`).
+    assists: { type: Number, min: 0, default: 0 },
+    yellowCards: { type: Number, min: 0, default: 0 },
+    redCards: { type: Number, min: 0, default: 0 },
+  },
+  { _id: false }
+);
+
 const matchSchema = new mongoose.Schema(
   {
     opponent: { type: String, required: true, trim: true },
@@ -30,6 +49,7 @@ const matchSchema = new mongoose.Schema(
     status: { type: String, enum: MATCH_STATUS, default: 'upcoming' },
     score: { type: scoreSchema, default: () => ({}) },
     scorers: { type: [scorerSchema], default: [] },
+    lineup: { type: [lineupSpotSchema], default: [] },
     // Live coverage
     minute: { type: Number, min: 0, max: 130, default: null }, // current match minute
     liveKey: { type: String, default: '', select: false }, // secret token for live contributors

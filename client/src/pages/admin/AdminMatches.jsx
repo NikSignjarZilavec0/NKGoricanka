@@ -4,6 +4,7 @@ import { errMessage, copyToClipboard } from '../../api/client.js';
 import { formatDateTime, STATUS_LABELS, toDateTimeInput } from '../../utils/format.js';
 import Modal from '../../components/Modal.jsx';
 import Loader from '../../components/Loader.jsx';
+import LineupEditor from '../../components/LineupEditor.jsx';
 import useDocumentTitle from '../../hooks/useDocumentTitle.js';
 import { useSeason } from '../../context/SeasonContext.jsx';
 
@@ -26,6 +27,8 @@ export default function AdminMatches() {
   const [liveInfo, setLiveInfo] = useState(null); // { match, liveUrl, liveKey }
   const [liveBusy, setLiveBusy] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [lineupMatch, setLineupMatch] = useState(null);
+  const [lineupSaving, setLineupSaving] = useState(false);
   useDocumentTitle('Tekme — Admin');
 
   const load = () => matchesApi.list().then(setItems).catch(() => setItems([]));
@@ -50,6 +53,21 @@ export default function AdminMatches() {
     const ok = await copyToClipboard(liveInfo.liveUrl);
     if (ok) setCopied(true);
     else window.prompt('Kopiraj povezavo ročno (Ctrl+C):', liveInfo.liveUrl);
+  };
+
+  const saveLineup = async (lineupArr) => {
+    setLineupSaving(true);
+    try {
+      const fd = new FormData();
+      fd.append('lineup', JSON.stringify(lineupArr));
+      await matchesApi.update(lineupMatch._id, fd);
+      setLineupMatch(null);
+      await load();
+    } catch (err) {
+      window.alert(errMessage(err, 'Shranjevanje postave ni uspelo.'));
+    } finally {
+      setLineupSaving(false);
+    }
   };
 
   const openNew = () => { setEditing(null); setForm(EMPTY); setScorers([]); setFile(null); setError(''); setModal(true); };
@@ -130,6 +148,7 @@ export default function AdminMatches() {
                 <td>{(m.status === 'finished' || m.status === 'live') && m.score?.ours != null ? `${m.score.ours} : ${m.score.theirs}` : '–'}</td>
                 <td><span className={`badge ${m.status === 'finished' ? 'badge--green' : m.status === 'cancelled' ? 'badge--gray' : m.status === 'live' ? 'badge--live' : ''}`}>{STATUS_LABELS[m.status]}</span></td>
                 <td className="admin-actions">
+                  <button className="btn btn--outline btn--sm" onClick={() => setLineupMatch(m)}>Postava{m.lineup?.length ? ` (${m.lineup.length})` : ''}</button>
                   <button className="btn btn--outline btn--sm" disabled={liveBusy} onClick={() => openLive(m)}>Živo</button>
                   <button className="btn btn--outline btn--sm" onClick={() => openEdit(m)}>Uredi</button>
                   <button className="btn btn--sm admin-del" onClick={() => onDelete(m)}>Izbriši</button>
@@ -205,6 +224,19 @@ export default function AdminMatches() {
             <button className="btn btn--primary" disabled={saving}>{saving ? 'Shranjujem…' : 'Shrani'}</button>
           </div>
         </form>
+      </Modal>
+
+      <Modal open={!!lineupMatch} title={lineupMatch ? `Postava — ${lineupMatch.opponent}` : 'Postava'} onClose={() => setLineupMatch(null)} wide>
+        {lineupMatch && (
+          <LineupEditor
+            initialLineup={lineupMatch.lineup || []}
+            players={players}
+            scorers={lineupMatch.scorers || []}
+            onCancel={() => setLineupMatch(null)}
+            onSave={saveLineup}
+            saving={lineupSaving}
+          />
+        )}
       </Modal>
 
       <Modal open={!!liveInfo} title="Povezava za živo posodabljanje" onClose={() => setLiveInfo(null)}>

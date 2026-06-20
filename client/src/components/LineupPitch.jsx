@@ -32,19 +32,20 @@ export default function LineupPitch({ lineup = [], scorers = [], className = '' 
         const goals = goalsForSpot(s, scorers);
         return (
           <div key={i} className="pitch-player" style={{ left: `${s.x}%`, top: `${s.y}%` }}>
-            <div className={`pitch-player__disc ${s.isGoalkeeper ? 'is-gk' : ''}`}>
-              {s.photo ? <img src={imageUrl(s.photo)} alt="" /> : <span className="pitch-player__init">{initialsOf(s.name)}</span>}
-              {s.number != null && s.number !== '' && <span className="pitch-player__num">{s.number}</span>}
-              {s.isCaptain && <span className="pitch-player__cap" title="Kapetan">C</span>}
-            </div>
             {(goals > 0 || s.assists > 0 || s.yellowCards > 0 || s.redCards > 0) && (
               <div className="pitch-player__events">
-                {goals > 0 && <span className="pev pev--goal" title="Goli"><IconBall size={11} />{goals > 1 ? `×${goals}` : ''}</span>}
+                {goals > 0 && <span className="pev pev--goal" title="Goli"><IconBall size={12} />{goals > 1 ? `×${goals}` : ''}</span>}
                 {s.assists > 0 && <span className="pev pev--assist" title="Asistence">A{s.assists > 1 ? `×${s.assists}` : ''}</span>}
                 {s.yellowCards > 0 && <span className="kard kard--y" title="Rumeni karton" />}
                 {s.redCards > 0 && <span className="kard kard--r" title="Rdeči karton" />}
               </div>
             )}
+            <div className={`pitch-player__disc ${s.isGoalkeeper ? 'is-gk' : ''}`}>
+              {s.photo ? <img src={imageUrl(s.photo)} alt="" /> : <span className="pitch-player__init">{initialsOf(s.name)}</span>}
+              {s.isGoalkeeper && <span className="pitch-player__gk" title="Vratar">GK</span>}
+              {s.isCaptain && <span className="pitch-player__cap" title="Kapetan">C</span>}
+              {s.number != null && s.number !== '' && <span className="pitch-player__num">{s.number}</span>}
+            </div>
             <span className="pitch-player__name">{s.name}</span>
           </div>
         );

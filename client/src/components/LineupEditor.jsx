@@ -82,8 +82,9 @@ export default function LineupEditor({ initialLineup = [], players = [], scorers
             >
               <div className={`pitch-player__disc ${s.isGoalkeeper ? 'is-gk' : ''}`}>
                 {s.photo ? <img src={imageUrl(s.photo)} alt="" /> : <span className="pitch-player__init">{initialsOf(s.name)}</span>}
-                {s.number !== '' && s.number != null && <span className="pitch-player__num">{s.number}</span>}
+                {s.isGoalkeeper && <span className="pitch-player__gk">GK</span>}
                 {s.isCaptain && <span className="pitch-player__cap">C</span>}
+                {s.number !== '' && s.number != null && <span className="pitch-player__num">{s.number}</span>}
               </div>
               <span className="pitch-player__name">{s.name}</span>
             </div>

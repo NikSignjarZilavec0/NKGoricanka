@@ -118,7 +118,8 @@ export const IconRuler = (p) => (
 export const IconBall = (p) => (
   <Svg {...p}>
     <circle cx="12" cy="12" r="9" />
-    <path d="m12 7.5 3 2.2-1.1 3.6h-3.8L9 9.7 12 7.5Z" />
+    <path d="M12 7.4 15.3 9.8 14 13.7 10 13.7 8.7 9.8 Z" />
+    <path d="M12 3v4.4M4.4 9.3l4.3 0.5M19.6 9.3l-4.3 0.5M7.7 19.4l2.3-3.7M16.3 19.4l-2.3-3.7" />
   </Svg>
 );
 

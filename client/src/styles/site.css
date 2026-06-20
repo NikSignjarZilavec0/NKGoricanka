@@ -404,6 +404,8 @@
 .scorer-list svg { width: 18px; height: 18px; color: var(--gold); flex: none; }
 .scorer-list__min { margin-left: auto; color: var(--gold); font-weight: 700; }
 .scorer-list__go { margin-left: auto; color: var(--gold); font-weight: 800; font-size: 1.2rem; line-height: 1; }
+.scorer-list__assist { color: var(--muted); font-size: 0.84rem; font-style: italic; }
+.scorer-list .kard { width: 13px; height: 17px; flex: none; }
 @media (max-width: 600px) { .match-detail__board { gap: 8px; } .match-detail__crest { width: 62px; height: 62px; } .match-detail__name { font-size: 0.95rem; } }
 
 /* ------------------------- Live control panel --------------------------- */
@@ -523,6 +525,13 @@
 .trend--down { color: var(--red-300); }
 .trend--same { color: rgba(255, 255, 255, 0.28); }
 .standings-legend { margin-top: 14px; font-size: 0.82rem; }
+
+/* Appearances picker (admin match form) */
+.appear-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin-top: 6px; }
+.appear-chip { display: flex; align-items: center; gap: 8px; padding: 8px 11px; border-radius: 10px; border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.04); color: var(--ink-soft); font-size: 0.86rem; font-weight: 600; cursor: pointer; transition: var(--transition); }
+.appear-chip:hover { background: rgba(255, 255, 255, 0.09); }
+.appear-chip.is-on { background: linear-gradient(135deg, rgba(224, 38, 60, 0.28), rgba(224, 38, 60, 0.12)); border-color: var(--red-400); color: #fff; }
+.appear-chip input { accent-color: var(--red-400); }
 
 /* ------------------------------ Lineup pitch ---------------------------- */
 .pitch {

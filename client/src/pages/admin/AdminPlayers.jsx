@@ -3,6 +3,7 @@ import { playersApi } from '../../api/services.js';
 import { imageUrl, errMessage } from '../../api/client.js';
 import { POSITION_LABELS, POSITION_GROUPS, toDateInput } from '../../utils/format.js';
 import { useSeason } from '../../context/SeasonContext.jsx';
+import SeasonSelect from '../../components/SeasonSelect.jsx';
 import Modal from '../../components/Modal.jsx';
 import Loader from '../../components/Loader.jsx';
 import useDocumentTitle from '../../hooks/useDocumentTitle.js';
@@ -54,12 +55,6 @@ export default function AdminPlayers() {
       const fd = new FormData();
       ['name', 'position', 'shirtNumber', 'birthdate', 'heightCm', 'nationality', 'bio', 'active']
         .forEach((k) => fd.append(k, form[k]));
-      fd.append('season', adminSeason); // stats apply to the selected season
-      fd.append('stats', JSON.stringify({
-        appearances: Number(form.appearances) || 0, goals: Number(form.goals) || 0,
-        assists: Number(form.assists) || 0, yellowCards: Number(form.yellowCards) || 0,
-        redCards: Number(form.redCards) || 0,
-      }));
       if (file) fd.append('photo', file);
       if (editing) await playersApi.update(editing._id, fd);
       else await playersApi.create(fd);
@@ -85,9 +80,7 @@ export default function AdminPlayers() {
       <div className="admin-page-head admin-page-head--row">
         <div><h1>Igralci</h1><p className="text-muted">{items.length} v kadru · sezona {adminSeason}</p></div>
         <div className="row">
-          <select className="select" style={{ width: 140 }} value={adminSeason} onChange={(e) => setAdminSeason(e.target.value)}>
-            {(seasons || []).map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
+          <SeasonSelect value={adminSeason} onChange={setAdminSeason} seasons={seasons} alwaysShow />
           <button className="btn btn--primary" onClick={openNew}>+ Nov igralec</button>
         </div>
       </div>
@@ -149,19 +142,10 @@ export default function AdminPlayers() {
             <textarea className="textarea" name="bio" value={form.bio} onChange={onChange} rows={4} />
           </div>
 
-          <h4 className="admin-form-section">Statistika — sezona {adminSeason}</h4>
-          <p className="text-muted" style={{ marginTop: -6, fontSize: '0.85rem' }}>
-            Statistika velja samo za sezono <strong>{adminSeason}</strong>. Osnovni podatki (ime, pozicija, številka,
-            fotografija …) so skupni vsem sezonam. Za drugo sezono zgoraj zamenjaj sezono.
+          <p className="text-muted" style={{ fontSize: '0.85rem' }}>
+            Statistika (nastopi, goli, asistence, kartoni) se <strong>samodejno sešteva iz tekem</strong> — vnašaš jo pri
+            posamezni tekmi (strelci, asistence, kartoni, nastopi). Tukaj urejaš samo osnovne podatke igralca.
           </p>
-          <div className="row">
-            {[['appearances', 'Nastopi'], ['goals', 'Goli'], ['assists', 'Asist.'], ['yellowCards', 'Rumeni'], ['redCards', 'Rdeči']].map(([k, label]) => (
-              <div key={k} className="field" style={{ flex: 1 }}>
-                <label>{label}</label>
-                <input className="input" type="number" min="0" name={k} value={form[k]} onChange={onChange} />
-              </div>
-            ))}
-          </div>
 
           <div className="row">
             <div className="field" style={{ flex: 1 }}>

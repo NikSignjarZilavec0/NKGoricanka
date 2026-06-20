@@ -17,28 +17,35 @@ export function PitchLines() {
   );
 }
 
-/** Goals for a lineup spot, derived from the match scorers (matched by name). */
-export function goalsForSpot(spot, scorers = []) {
-  const n = (spot.name || '').trim().toLowerCase();
-  if (!n) return 0;
-  return scorers.filter((s) => (s.playerName || '').trim().toLowerCase() === n).length;
+const sameId = (a, b) => a && b && String(a) === String(b);
+
+/** A spot's match events, derived from the match scorers + cards (by playerId, name fallback). */
+export function eventsForSpot(spot, scorers = [], cards = []) {
+  const mine = (x, getId, getName) =>
+    spot.playerId ? sameId(getId(x), spot.playerId)
+      : (getName(x) || '').trim().toLowerCase() === (spot.name || '').trim().toLowerCase();
+  const goals = scorers.filter((s) => mine(s, (x) => x.playerId, (x) => x.playerName)).length;
+  const assists = spot.playerId ? scorers.filter((s) => sameId(s.assistPlayerId, spot.playerId)).length : 0;
+  const yellow = cards.filter((c) => c.type === 'yellow' && mine(c, (x) => x.playerId, (x) => x.playerName)).length;
+  const red = cards.filter((c) => c.type === 'red' && mine(c, (x) => x.playerId, (x) => x.playerName)).length;
+  return { goals, assists, yellow, red };
 }
 
 /** A football pitch with placed players. Read-only display. */
-export default function LineupPitch({ lineup = [], scorers = [], className = '' }) {
+export default function LineupPitch({ lineup = [], scorers = [], cards = [], className = '' }) {
   return (
     <div className={`pitch ${className}`}>
       <PitchLines />
       {lineup.map((s, i) => {
-        const goals = goalsForSpot(s, scorers);
+        const ev = eventsForSpot(s, scorers, cards);
         const inner = (
           <>
-            {(goals > 0 || s.assists > 0 || s.yellowCards > 0 || s.redCards > 0) && (
+            {(ev.goals > 0 || ev.assists > 0 || ev.yellow > 0 || ev.red > 0) && (
               <div className="pitch-player__events">
-                {goals > 0 && <span className="pev pev--goal" title="Goli"><IconBall size={12} />{goals > 1 ? `×${goals}` : ''}</span>}
-                {s.assists > 0 && <span className="pev pev--assist" title="Asistence">A{s.assists > 1 ? `×${s.assists}` : ''}</span>}
-                {s.yellowCards > 0 && <span className="kard kard--y" title="Rumeni karton" />}
-                {s.redCards > 0 && <span className="kard kard--r" title="Rdeči karton" />}
+                {ev.goals > 0 && <span className="pev pev--goal" title="Goli"><IconBall size={12} />{ev.goals > 1 ? `×${ev.goals}` : ''}</span>}
+                {ev.assists > 0 && <span className="pev pev--assist" title="Asistence">A{ev.assists > 1 ? `×${ev.assists}` : ''}</span>}
+                {ev.yellow > 0 && <span className="kard kard--y" title="Rumeni karton" />}
+                {ev.red > 0 && <span className="kard kard--r" title="Rdeči karton" />}
               </div>
             )}
             <div className={`pitch-player__disc ${s.isGoalkeeper ? 'is-gk' : ''}`}>

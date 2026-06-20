@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { standingsApi } from '../../api/services.js';
 import { errMessage } from '../../api/client.js';
 import { useSeason } from '../../context/SeasonContext.jsx';
+import SeasonSelect from '../../components/SeasonSelect.jsx';
 import Modal from '../../components/Modal.jsx';
 import Loader from '../../components/Loader.jsx';
 import useDocumentTitle from '../../hooks/useDocumentTitle.js';
@@ -79,9 +80,7 @@ export default function AdminStandings() {
           <p className="text-muted">Ročni vnos; točke (3·Z + N) in razvrstitev sta samodejni.</p>
         </div>
         <div className="row">
-          <select className="select" style={{ width: 150 }} value={season} onChange={(e) => setSeason(e.target.value)}>
-            {(seasons || []).map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
+          <SeasonSelect value={season} onChange={setSeason} seasons={seasons} alwaysShow />
           <button className="btn btn--primary" onClick={openNew}>+ Nova vrstica</button>
         </div>
       </div>

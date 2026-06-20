@@ -5,6 +5,7 @@ import { formatDateTime, STATUS_LABELS, toDateTimeInput } from '../../utils/form
 import Modal from '../../components/Modal.jsx';
 import Loader from '../../components/Loader.jsx';
 import LineupEditor from '../../components/LineupEditor.jsx';
+import PlayerSelect from '../../components/PlayerSelect.jsx';
 import useDocumentTitle from '../../hooks/useDocumentTitle.js';
 import { useSeason } from '../../context/SeasonContext.jsx';
 
@@ -21,6 +22,8 @@ export default function AdminMatches() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY);
   const [scorers, setScorers] = useState([]);
+  const [cards, setCards] = useState([]);
+  const [appearances, setAppearances] = useState([]); // [{ playerId, playerName }]
   const [file, setFile] = useState(null);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -70,7 +73,10 @@ export default function AdminMatches() {
     }
   };
 
-  const openNew = () => { setEditing(null); setForm(EMPTY); setScorers([]); setFile(null); setError(''); setModal(true); };
+  const openNew = () => {
+    setEditing(null); setForm(EMPTY); setScorers([]); setCards([]); setAppearances([]);
+    setFile(null); setError(''); setModal(true);
+  };
   const openEdit = (m) => {
     setEditing(m); setFile(null); setError('');
     setForm({
@@ -79,7 +85,14 @@ export default function AdminMatches() {
       status: m.status || 'upcoming',
       scoreOurs: m.score?.ours ?? '', scoreTheirs: m.score?.theirs ?? '', minute: m.minute ?? '',
     });
-    setScorers((m.scorers || []).map((s) => ({ playerName: s.playerName, minute: s.minute ?? '' })));
+    setScorers((m.scorers || []).map((s) => ({
+      playerId: s.playerId || '', playerName: s.playerName || '', minute: s.minute ?? '',
+      assistPlayerId: s.assistPlayerId || '', assistName: s.assistName || '',
+    })));
+    setCards((m.cards || []).map((c) => ({
+      playerId: c.playerId || '', playerName: c.playerName || '', type: c.type || 'yellow', minute: c.minute ?? '',
+    })));
+    setAppearances((m.appearances || []).map((a) => ({ playerId: a.playerId || '', playerName: a.playerName || '' })));
     setModal(true);
   };
 
@@ -88,9 +101,24 @@ export default function AdminMatches() {
     setForm((f) => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  const addScorer = () => setScorers((s) => [...s, { playerName: '', minute: '' }]);
-  const updateScorer = (i, key, val) => setScorers((s) => s.map((sc, idx) => idx === i ? { ...sc, [key]: val } : sc));
+  const nameOf = (id) => players.find((p) => p._id === id)?.name || '';
+
+  // Scorers
+  const addScorer = () => setScorers((s) => [...s, { playerId: '', playerName: '', minute: '', assistPlayerId: '', assistName: '' }]);
+  const patchScorer = (i, patch) => setScorers((s) => s.map((sc, idx) => (idx === i ? { ...sc, ...patch } : sc)));
   const removeScorer = (i) => setScorers((s) => s.filter((_, idx) => idx !== i));
+
+  // Cards
+  const addCard = () => setCards((c) => [...c, { playerId: '', playerName: '', type: 'yellow', minute: '' }]);
+  const patchCard = (i, patch) => setCards((c) => c.map((cd, idx) => (idx === i ? { ...cd, ...patch } : cd)));
+  const removeCard = (i) => setCards((c) => c.filter((_, idx) => idx !== i));
+
+  // Appearances (who played)
+  const isAppearing = (id) => appearances.some((a) => a.playerId === id);
+  const toggleAppearance = (p) => setAppearances((a) =>
+    a.some((x) => x.playerId === p._id) ? a.filter((x) => x.playerId !== p._id) : [...a, { playerId: p._id, playerName: p.name }]);
+  const selectAllActive = () => setAppearances(players.filter((p) => p.active !== false).map((p) => ({ playerId: p._id, playerName: p.name })));
+  const clearAppearances = () => setAppearances([]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -104,8 +132,16 @@ export default function AdminMatches() {
       fd.append('scoreTheirs', form.scoreTheirs);
       fd.append('minute', form.minute);
       fd.append('scorers', JSON.stringify(
-        scorers.filter((s) => s.playerName.trim()).map((s) => ({ playerName: s.playerName.trim(), minute: s.minute })))
-      );
+        scorers.filter((s) => s.playerId).map((s) => ({
+          playerId: s.playerId, playerName: s.playerName || nameOf(s.playerId), minute: s.minute,
+          assistPlayerId: s.assistPlayerId || null, assistName: s.assistPlayerId ? (s.assistName || nameOf(s.assistPlayerId)) : '',
+        }))));
+      fd.append('cards', JSON.stringify(
+        cards.filter((c) => c.playerId).map((c) => ({
+          playerId: c.playerId, playerName: c.playerName || nameOf(c.playerId), type: c.type, minute: c.minute,
+        }))));
+      fd.append('appearances', JSON.stringify(
+        appearances.filter((a) => a.playerId).map((a) => ({ playerId: a.playerId, playerName: a.playerName || nameOf(a.playerId) }))));
       if (file) fd.append('opponentLogo', file);
       if (editing) await matchesApi.update(editing._id, fd);
       else await matchesApi.create(fd);
@@ -162,9 +198,6 @@ export default function AdminMatches() {
       <Modal open={modal} title={editing ? 'Uredi tekmo' : 'Nova tekma'} onClose={() => setModal(false)} wide>
         <form onSubmit={onSubmit}>
           {error && <div className="alert alert--error">{error}</div>}
-          <datalist id="player-names">
-            {players.map((p) => <option key={p._id} value={p.name} />)}
-          </datalist>
           <div className="row">
             <div className="field" style={{ flex: 2 }}><label>Nasprotnik *</label>
               <input className="input" name="opponent" value={form.opponent} onChange={onChange} required /></div>
@@ -203,15 +236,45 @@ export default function AdminMatches() {
                   <input className="input" type="number" min="0" max="130" name="minute" value={form.minute} onChange={onChange} /></div>
               </div>
 
-              <h4 className="admin-form-section">Strelci <button type="button" className="btn btn--outline btn--sm" onClick={addScorer}>+ Dodaj</button></h4>
-              {scorers.length === 0 && <p className="text-muted">Ni vnesenih strelcev.</p>}
+              <h4 className="admin-form-section">Strelci (goli) <button type="button" className="btn btn--outline btn--sm" onClick={addScorer}>+ Dodaj gol</button></h4>
+              {scorers.length === 0 && <p className="text-muted">Ni vnesenih golov.</p>}
               {scorers.map((s, i) => (
-                <div className="row scorer-row" key={i}>
-                  <input className="input" style={{ flex: 2 }} list="player-names" placeholder="Ime strelca" value={s.playerName} onChange={(e) => updateScorer(i, 'playerName', e.target.value)} />
-                  <input className="input" style={{ flex: 1 }} type="number" min="1" max="130" placeholder="min." value={s.minute} onChange={(e) => updateScorer(i, 'minute', e.target.value)} />
+                <div className="row scorer-row" key={i} style={{ flexWrap: 'nowrap', alignItems: 'center' }}>
+                  <PlayerSelect players={players} value={s.playerId} onChange={(id) => patchScorer(i, { playerId: id, playerName: nameOf(id) })} style={{ flex: 2 }} placeholder="— strelec —" />
+                  <input className="input" style={{ width: 70, flex: 'none' }} type="number" min="1" max="130" placeholder="min." value={s.minute} onChange={(e) => patchScorer(i, { minute: e.target.value })} />
+                  <PlayerSelect players={players} value={s.assistPlayerId} onChange={(id) => patchScorer(i, { assistPlayerId: id, assistName: nameOf(id) })} style={{ flex: 2 }} placeholder="— asistenca (neobvezno) —" />
                   <button type="button" className="btn btn--sm admin-del" onClick={() => removeScorer(i)}>✕</button>
                 </div>
               ))}
+
+              <h4 className="admin-form-section">Kartoni <button type="button" className="btn btn--outline btn--sm" onClick={addCard}>+ Dodaj karton</button></h4>
+              {cards.length === 0 && <p className="text-muted">Ni vnesenih kartonov.</p>}
+              {cards.map((c, i) => (
+                <div className="row scorer-row" key={i} style={{ flexWrap: 'nowrap', alignItems: 'center' }}>
+                  <PlayerSelect players={players} value={c.playerId} onChange={(id) => patchCard(i, { playerId: id, playerName: nameOf(id) })} style={{ flex: 2 }} placeholder="— igralec —" />
+                  <select className="select" style={{ width: 120, flex: 'none' }} value={c.type} onChange={(e) => patchCard(i, { type: e.target.value })}>
+                    <option value="yellow">Rumeni</option>
+                    <option value="red">Rdeči</option>
+                  </select>
+                  <input className="input" style={{ width: 70, flex: 'none' }} type="number" min="1" max="130" placeholder="min." value={c.minute} onChange={(e) => patchCard(i, { minute: e.target.value })} />
+                  <button type="button" className="btn btn--sm admin-del" onClick={() => removeCard(i)}>✕</button>
+                </div>
+              ))}
+
+              <h4 className="admin-form-section">
+                Nastopi (kdo je igral)
+                <button type="button" className="btn btn--outline btn--sm" onClick={selectAllActive}>Vsi aktivni</button>
+                <button type="button" className="btn btn--outline btn--sm" onClick={clearAppearances}>Počisti</button>
+              </h4>
+              <p className="text-muted" style={{ marginTop: -6, fontSize: '0.84rem' }}>Izbrani igralci dobijo nastop pri tej tekmi. (Strelci in kartonirani se štejejo samodejno.)</p>
+              <div className="appear-grid">
+                {players.filter((p) => p.active !== false).map((p) => (
+                  <label key={p._id} className={`appear-chip ${isAppearing(p._id) ? 'is-on' : ''}`}>
+                    <input type="checkbox" checked={isAppearing(p._id)} onChange={() => toggleAppearance(p)} />
+                    {p.shirtNumber != null ? `${p.shirtNumber}. ` : ''}{p.name}
+                  </label>
+                ))}
+              </div>
             </>
           )}
 

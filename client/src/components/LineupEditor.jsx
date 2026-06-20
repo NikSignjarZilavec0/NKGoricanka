@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { imageUrl } from '../api/client.js';
-import { PitchLines, goalsForSpot } from './LineupPitch.jsx';
+import { PitchLines } from './LineupPitch.jsx';
 
 const clamp = (v) => Math.max(3, Math.min(97, v));
 const initialsOf = (name) => name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
@@ -29,7 +29,6 @@ export default function LineupEditor({ initialLineup = [], players = [], scorers
     setLineup((L) => [...L, {
       playerId: p._id, name: p.name, number: p.shirtNumber ?? '', photo: p.photo || '',
       ...defaultPos(L.length), isCaptain: false, isGoalkeeper: p.position === 'goalkeeper',
-      assists: 0, yellowCards: 0, redCards: 0,
     }]);
     setSelected(lineup.length);
   };
@@ -39,7 +38,7 @@ export default function LineupEditor({ initialLineup = [], players = [], scorers
     if (!name || !name.trim()) return;
     setLineup((L) => [...L, {
       playerId: null, name: name.trim(), number: '', photo: '',
-      ...defaultPos(L.length), isCaptain: false, isGoalkeeper: false, assists: 0, yellowCards: 0, redCards: 0,
+      ...defaultPos(L.length), isCaptain: false, isGoalkeeper: false,
     }]);
     setSelected(lineup.length);
   };
@@ -105,18 +104,7 @@ export default function LineupEditor({ initialLineup = [], players = [], scorers
                 <label className="checkbox"><input type="checkbox" checked={sel.isCaptain} onChange={(e) => setExclusive(selected, 'isCaptain', e.target.checked)} /> Kapetan</label>
                 <label className="checkbox"><input type="checkbox" checked={sel.isGoalkeeper} onChange={(e) => setExclusive(selected, 'isGoalkeeper', e.target.checked)} /> Golman</label>
               </div>
-              <div className="row">
-                <div className="field" style={{ flex: 1 }}><label>Goli (samodejno)</label>
-                  <input className="input" value={goalsForSpot(sel, scorers)} readOnly title="Iz seznama strelcev tekme" /></div>
-                <div className="field" style={{ flex: 1 }}><label>Asistence</label>
-                  <input className="input" type="number" min="0" value={sel.assists} onChange={(e) => update(selected, { assists: Number(e.target.value) || 0 })} /></div>
-              </div>
-              <div className="row">
-                <div className="field" style={{ flex: 1 }}><label>Rumeni kartoni</label>
-                  <input className="input" type="number" min="0" max="2" value={sel.yellowCards} onChange={(e) => update(selected, { yellowCards: Number(e.target.value) || 0 })} /></div>
-                <div className="field" style={{ flex: 1 }}><label>Rdeči kartoni</label>
-                  <input className="input" type="number" min="0" max="1" value={sel.redCards} onChange={(e) => update(selected, { redCards: Number(e.target.value) || 0 })} /></div>
-              </div>
+              <p className="text-muted" style={{ margin: '4px 0 0', fontSize: '0.8rem' }}>Goli, asistence in kartoni se prikažejo samodejno iz podatkov tekme.</p>
             </div>
           ) : (
             <div className="card lineup-ctl"><p className="text-muted" style={{ margin: 0 }}>Klikni igralca na igrišču za urejanje.</p></div>

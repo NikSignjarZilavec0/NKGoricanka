@@ -145,6 +145,24 @@ export async function migrateData() {
       console.log(`[migrate] Backfilled seasons: ${info.seasons.join(', ')}`);
     }
   }
+
+  // Link existing free-text scorers to players by name so derived stats work.
+  const roster = await Player.find().select('name').lean();
+  const byName = new Map(roster.map((p) => [p.name.trim().toLowerCase(), p._id]));
+  const matches = await Match.find().select('scorers').lean();
+  let linked = 0;
+  for (const m of matches) {
+    let changed = false;
+    const scorers = (m.scorers || []).map((s) => {
+      if (!s.playerId && s.playerName) {
+        const id = byName.get(s.playerName.trim().toLowerCase());
+        if (id) { changed = true; return { ...s, playerId: id }; }
+      }
+      return s;
+    });
+    if (changed) { await Match.collection.updateOne({ _id: m._id }, { $set: { scorers } }); linked += 1; }
+  }
+  if (linked) console.log(`[migrate] Linked scorers to players in ${linked} matches`);
 }
 
 /** Seed all content if the database is empty. Idempotent. */

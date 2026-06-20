@@ -28,6 +28,7 @@ export default function MatchDetailPage() {
   // Resolve a scorer name to a player id (case-insensitive exact name match).
   const playerByName = new Map(players.map((p) => [p.name.trim().toLowerCase(), p._id]));
   const playerIdFor = (name) => playerByName.get((name || '').trim().toLowerCase());
+  const nameOfId = (id) => players.find((p) => String(p._id) === String(id))?.name || '';
 
   // Real-time updates
   useMatchStream((m) => { if (m._id === id) setMatch(m); });
@@ -96,11 +97,14 @@ export default function MatchDetailPage() {
             {match.scorers?.length > 0 ? (
               <ul className="scorer-list">
                 {match.scorers.map((s, i) => {
-                  const pid = playerIdFor(s.playerName);
+                  const pid = s.playerId || playerIdFor(s.playerName);
                   const inner = (
                     <>
                       <IconBall />
                       <strong>{s.playerName}</strong>
+                      {(s.assistName || s.assistPlayerId) && (
+                        <span className="scorer-list__assist">asist. {s.assistName || nameOfId(s.assistPlayerId)}</span>
+                      )}
                       {s.minute ? <span className="scorer-list__min">{s.minute}'</span> : null}
                       {pid && <span className="scorer-list__go" aria-hidden="true">›</span>}
                     </>
@@ -117,6 +121,32 @@ export default function MatchDetailPage() {
             ) : (
               <p className="text-muted">Ni vpisanih strelcev.</p>
             )}
+
+            {match.cards?.length > 0 && (
+              <>
+                <h2 className="section-title" style={{ marginTop: 32 }}>Kartoni</h2>
+                <ul className="scorer-list">
+                  {match.cards.map((c, i) => {
+                    const pid = c.playerId || playerIdFor(c.playerName);
+                    const inner = (
+                      <>
+                        <span className={`kard ${c.type === 'red' ? 'kard--r' : 'kard--y'}`} />
+                        <strong>{c.playerName}</strong>
+                        {c.minute ? <span className="scorer-list__min">{c.minute}'</span> : null}
+                        {pid && <span className="scorer-list__go" aria-hidden="true">›</span>}
+                      </>
+                    );
+                    return (
+                      <li key={i}>
+                        {pid
+                          ? <Link to={`/players/${pid}`} className="scorer-list__box scorer-list__box--link">{inner}</Link>
+                          : <span className="scorer-list__box">{inner}</span>}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -125,7 +155,7 @@ export default function MatchDetailPage() {
         <section className="section section--tight">
           <div className="container">
             <h2 className="section-title">Postava — {us}</h2>
-            <LineupPitch lineup={match.lineup} scorers={match.scorers || []} />
+            <LineupPitch lineup={match.lineup} scorers={match.scorers || []} cards={match.cards || []} />
           </div>
         </section>
       )}

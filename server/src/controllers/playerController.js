@@ -1,49 +1,44 @@
 import Player from '../models/Player.js';
+import Match from '../models/Match.js';
 import { publicPath } from '../middleware/upload.js';
 
-const STAT_KEYS = ['appearances', 'goals', 'assists', 'yellowCards', 'redCards'];
 const zeroStats = () => ({ appearances: 0, goals: 0, assists: 0, yellowCards: 0, redCards: 0 });
 
-/** Parse the nested stats object whether it arrives as JSON string or flat fields. */
-function parseStats(body) {
-  if (body.stats) {
-    try {
-      return typeof body.stats === 'string' ? JSON.parse(body.stats) : body.stats;
-    } catch {
-      /* fall through to flat parsing */
-    }
+/**
+ * Aggregate per-player stats from matches (single source of truth).
+ * Keyed by playerId string. A player "appears" in a match if they are in the
+ * appearances list OR they scored/assisted/were carded in it.
+ */
+function aggregateMatches(matches) {
+  const map = new Map();
+  const ensure = (k) => {
+    if (!map.has(k)) map.set(k, zeroStats());
+    return map.get(k);
+  };
+  for (const m of matches) {
+    const appeared = new Set();
+    (m.scorers || []).forEach((s) => {
+      if (s.playerId) { ensure(String(s.playerId)).goals += 1; appeared.add(String(s.playerId)); }
+      if (s.assistPlayerId) { ensure(String(s.assistPlayerId)).assists += 1; appeared.add(String(s.assistPlayerId)); }
+    });
+    (m.cards || []).forEach((c) => {
+      if (c.playerId) {
+        ensure(String(c.playerId))[c.type === 'red' ? 'redCards' : 'yellowCards'] += 1;
+        appeared.add(String(c.playerId));
+      }
+    });
+    (m.appearances || []).forEach((a) => { if (a.playerId) appeared.add(String(a.playerId)); });
+    appeared.forEach((k) => { ensure(k).appearances += 1; });
   }
-  const stats = {};
-  STAT_KEYS.forEach((k) => {
-    if (body[k] !== undefined) stats[k] = Number(body[k]) || 0;
-  });
-  return Object.keys(stats).length ? stats : undefined;
+  return map;
 }
 
-/** Read a seasonStats entry from a plain object or a Mongoose Map. */
-function readSeason(seasonStats, season) {
-  if (!seasonStats) return undefined;
-  return seasonStats instanceof Map ? seasonStats.get(season) : seasonStats[season];
-}
-function allSeasonValues(seasonStats) {
-  if (!seasonStats) return [];
-  return seasonStats instanceof Map ? [...seasonStats.values()] : Object.values(seasonStats);
+/** Fetch the matches relevant to a season (all if none) with just the event fields. */
+function matchesForSeason(season) {
+  return Match.find(season ? { season } : {}).select('scorers cards appearances').lean();
 }
 
-/** Resolve a player's stats for a given season (no season → totals across all seasons). */
-function statsFor(seasonStats, season) {
-  if (season) return { ...zeroStats(), ...(readSeason(seasonStats, season) || {}) };
-  const total = zeroStats();
-  allSeasonValues(seasonStats).forEach((s) => STAT_KEYS.forEach((k) => { total[k] += s?.[k] || 0; }));
-  return total;
-}
-
-/** Attach a flat `stats` field for the requested season (keeps `seasonStats` too). */
-function withStats(playerObj, season) {
-  return { ...playerObj, stats: statsFor(playerObj.seasonStats, season) };
-}
-
-/** Profile fields shared across all seasons. */
+/** Profile fields shared across all seasons (stats are derived, never stored here). */
 function profileFields(body, file) {
   const fields = {};
   ['name', 'position', 'bio', 'nationality'].forEach((k) => {
@@ -57,17 +52,21 @@ function profileFields(body, file) {
   return fields;
 }
 
-/** Public/admin: list players (all seasons), with stats resolved for `?season=`. */
+/** Public/admin: list players with stats derived for `?season=` (no season = all). */
 export async function list(req, res, next) {
   try {
     const order = { goalkeeper: 0, defender: 1, midfielder: 2, forward: 3 };
-    const players = await Player.find().lean();
+    const [players, matches] = await Promise.all([
+      Player.find().lean(),
+      matchesForSeason(req.query.season),
+    ]);
+    const agg = aggregateMatches(matches);
     players.sort(
       (a, b) =>
         (order[a.position] ?? 9) - (order[b.position] ?? 9) ||
         (a.shirtNumber ?? 99) - (b.shirtNumber ?? 99)
     );
-    res.json(players.map((p) => withStats(p, req.query.season)));
+    res.json(players.map((p) => ({ ...p, stats: agg.get(String(p._id)) || zeroStats() })));
   } catch (err) {
     next(err);
   }
@@ -77,7 +76,9 @@ export async function getById(req, res, next) {
   try {
     const player = await Player.findById(req.params.id).lean();
     if (!player) return res.status(404).json({ error: 'Igralec ni najden.' });
-    res.json(withStats(player, req.query.season));
+    const matches = await matchesForSeason(req.query.season);
+    const agg = aggregateMatches(matches);
+    res.json({ ...player, stats: agg.get(String(player._id)) || zeroStats() });
   } catch (err) {
     next(err);
   }
@@ -85,12 +86,8 @@ export async function getById(req, res, next) {
 
 export async function create(req, res, next) {
   try {
-    const fields = profileFields(req.body, req.file);
-    const season = req.body.season;
-    const stats = parseStats(req.body);
-    if (season && stats) fields.seasonStats = { [season]: stats };
-    const player = await Player.create(fields);
-    res.status(201).json(withStats(player.toJSON(), season));
+    const player = await Player.create(profileFields(req.body, req.file));
+    res.status(201).json({ ...player.toJSON(), stats: zeroStats() });
   } catch (err) {
     next(err);
   }
@@ -98,14 +95,12 @@ export async function create(req, res, next) {
 
 export async function update(req, res, next) {
   try {
-    const player = await Player.findById(req.params.id);
+    const player = await Player.findByIdAndUpdate(req.params.id, profileFields(req.body, req.file), {
+      new: true,
+      runValidators: true,
+    });
     if (!player) return res.status(404).json({ error: 'Igralec ni najden.' });
-    Object.assign(player, profileFields(req.body, req.file));
-    const season = req.body.season;
-    const stats = parseStats(req.body);
-    if (season && stats) player.seasonStats.set(season, stats);
-    await player.save();
-    res.json(withStats(player.toJSON(), season));
+    res.json(player);
   } catch (err) {
     next(err);
   }

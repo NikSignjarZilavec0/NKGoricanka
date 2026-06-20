@@ -3,20 +3,53 @@ import Match, { MATCH_STATUS } from '../models/Match.js';
 import { publicPath } from '../middleware/upload.js';
 import { addClient, broadcastMatch } from '../live/liveBus.js';
 
-function parseScorers(body) {
-  if (body.scorers === undefined) return undefined;
+const idOrNull = (v) => (v ? v : null);
+// Missing minute defaults to 1 ("first minute") so events always have a minute.
+const minuteOr1 = (v) => (v !== undefined && v !== '' && v !== null ? Number(v) : 1);
+
+function parseJsonArray(value) {
+  if (value === undefined) return undefined;
   try {
-    const arr = typeof body.scorers === 'string' ? JSON.parse(body.scorers) : body.scorers;
-    if (!Array.isArray(arr)) return [];
-    return arr
-      .filter((s) => s && s.playerName)
-      .map((s) => ({
-        playerName: String(s.playerName).trim(),
-        minute: s.minute !== undefined && s.minute !== '' ? Number(s.minute) : undefined,
-      }));
+    const arr = typeof value === 'string' ? JSON.parse(value) : value;
+    return Array.isArray(arr) ? arr : [];
   } catch {
     return [];
   }
+}
+
+function parseScorers(body) {
+  const arr = parseJsonArray(body.scorers);
+  if (arr === undefined) return undefined;
+  return arr
+    .filter((s) => s && s.playerName)
+    .map((s) => ({
+      playerId: idOrNull(s.playerId),
+      playerName: String(s.playerName).trim(),
+      minute: minuteOr1(s.minute),
+      assistPlayerId: idOrNull(s.assistPlayerId),
+      assistName: s.assistName ? String(s.assistName).trim() : '',
+    }));
+}
+
+function parseCards(body) {
+  const arr = parseJsonArray(body.cards);
+  if (arr === undefined) return undefined;
+  return arr
+    .filter((c) => c && c.playerName && (c.type === 'yellow' || c.type === 'red'))
+    .map((c) => ({
+      playerId: idOrNull(c.playerId),
+      playerName: String(c.playerName).trim(),
+      type: c.type,
+      minute: minuteOr1(c.minute),
+    }));
+}
+
+function parseAppearances(body) {
+  const arr = parseJsonArray(body.appearances);
+  if (arr === undefined) return undefined;
+  return arr
+    .filter((a) => a && a.playerName)
+    .map((a) => ({ playerId: idOrNull(a.playerId), playerName: String(a.playerName).trim() }));
 }
 
 function clampPct(v) {
@@ -26,28 +59,20 @@ function clampPct(v) {
 }
 
 function parseLineup(body) {
-  if (body.lineup === undefined) return undefined;
-  try {
-    const arr = typeof body.lineup === 'string' ? JSON.parse(body.lineup) : body.lineup;
-    if (!Array.isArray(arr)) return [];
-    return arr
-      .filter((s) => s && s.name)
-      .map((s) => ({
-        playerId: s.playerId || null,
-        name: String(s.name).trim(),
-        number: s.number !== undefined && s.number !== '' ? Number(s.number) : undefined,
-        photo: s.photo || '',
-        x: clampPct(s.x),
-        y: clampPct(s.y),
-        isCaptain: Boolean(s.isCaptain),
-        isGoalkeeper: Boolean(s.isGoalkeeper),
-        assists: Number(s.assists) || 0,
-        yellowCards: Number(s.yellowCards) || 0,
-        redCards: Number(s.redCards) || 0,
-      }));
-  } catch {
-    return [];
-  }
+  const arr = parseJsonArray(body.lineup);
+  if (arr === undefined) return undefined;
+  return arr
+    .filter((s) => s && s.name)
+    .map((s) => ({
+      playerId: idOrNull(s.playerId),
+      name: String(s.name).trim(),
+      number: s.number !== undefined && s.number !== '' ? Number(s.number) : undefined,
+      photo: s.photo || '',
+      x: clampPct(s.x),
+      y: clampPct(s.y),
+      isCaptain: Boolean(s.isCaptain),
+      isGoalkeeper: Boolean(s.isGoalkeeper),
+    }));
 }
 
 function buildFields(body, file) {
@@ -71,6 +96,10 @@ function buildFields(body, file) {
 
   const scorers = parseScorers(body);
   if (scorers !== undefined) fields.scorers = scorers;
+  const cards = parseCards(body);
+  if (cards !== undefined) fields.cards = cards;
+  const appearances = parseAppearances(body);
+  if (appearances !== undefined) fields.appearances = appearances;
   const lineup = parseLineup(body);
   if (lineup !== undefined) fields.lineup = lineup;
   if (file) fields.opponentLogo = publicPath(file);
@@ -187,6 +216,10 @@ export async function liveUpdate(req, res, next) {
 
     const scorers = parseScorers(b);
     if (scorers !== undefined) match.scorers = scorers;
+    const cards = parseCards(b);
+    if (cards !== undefined) match.cards = cards;
+    const appearances = parseAppearances(b);
+    if (appearances !== undefined) match.appearances = appearances;
 
     match.liveUpdatedAt = new Date();
     await match.save();

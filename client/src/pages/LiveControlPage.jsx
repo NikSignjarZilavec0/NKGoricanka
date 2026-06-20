@@ -6,6 +6,7 @@ import { useClub } from '../context/ClubContext.jsx';
 import Loader from '../components/Loader.jsx';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
 import Logo from '../components/Logo.jsx';
+import PlayerSelect from '../components/PlayerSelect.jsx';
 
 const STATUSES = [
   { v: 'upcoming', label: 'Pred tekmo' },
@@ -24,9 +25,13 @@ export default function LiveControlPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState(null);
-  const [scorerName, setScorerName] = useState('');
+  const [scorerId, setScorerId] = useState('');
   const [scorerMin, setScorerMin] = useState('');
+  const [cardId, setCardId] = useState('');
+  const [cardType, setCardType] = useState('yellow');
+  const [cardMin, setCardMin] = useState('');
   const [players, setPlayers] = useState([]);
+  const nameOf = (pid) => players.find((p) => p._id === pid)?.name || '';
 
   useDocumentTitle('Živo upravljanje');
 
@@ -39,7 +44,8 @@ export default function LiveControlPage() {
           minute: m.minute ?? '',
           ours: m.score?.ours ?? 0,
           theirs: m.score?.theirs ?? 0,
-          scorers: (m.scorers || []).map((s) => ({ playerName: s.playerName, minute: s.minute ?? '' })),
+          scorers: (m.scorers || []).map((s) => ({ playerId: s.playerId || '', playerName: s.playerName, minute: s.minute ?? '' })),
+          cards: (m.cards || []).map((c) => ({ playerId: c.playerId || '', playerName: c.playerName, type: c.type, minute: c.minute ?? '' })),
         });
       })
       .catch((e) => setMsg({ type: 'error', text: errMessage(e, 'Tekma ni najdena.') }))
@@ -57,7 +63,8 @@ export default function LiveControlPage() {
         minute: next.minute === '' ? null : Number(next.minute),
         scoreOurs: next.ours,
         scoreTheirs: next.theirs,
-        scorers: next.scorers.filter((s) => s.playerName.trim()),
+        scorers: (next.scorers || []).filter((s) => s.playerId),
+        cards: (next.cards || []).filter((c) => c.playerId),
       });
       setMatch(updated);
       setMsg({ type: 'success', text: 'Posodobljeno ✓ — vidno na strani v živo' });
@@ -128,8 +135,8 @@ export default function LiveControlPage() {
 
         {/* Scorers */}
         <div className="live-block">
-          <span className="live-block__label">Strelci</span>
-          {state.scorers.length === 0 && <p className="text-muted" style={{ margin: '4px 0' }}>Ni vpisanih strelcev.</p>}
+          <span className="live-block__label">Strelci (goli)</span>
+          {state.scorers.length === 0 && <p className="text-muted" style={{ margin: '4px 0' }}>Ni vpisanih golov.</p>}
           {state.scorers.map((s, i) => (
             <div className="live-scorer" key={i}>
               <span><strong>{s.playerName}</strong>{s.minute ? ` ${s.minute}'` : ''}</span>
@@ -137,14 +144,36 @@ export default function LiveControlPage() {
                 onClick={() => push({ ...state, scorers: state.scorers.filter((_, idx) => idx !== i) })}>Odstrani</button>
             </div>
           ))}
-          <datalist id="live-player-names">
-            {players.map((p) => <option key={p._id} value={p.name} />)}
-          </datalist>
           <div className="row" style={{ marginTop: 10, flexWrap: 'nowrap' }}>
-            <input className="input" style={{ flex: 2 }} list="live-player-names" placeholder="Ime strelca" value={scorerName} onChange={(e) => setScorerName(e.target.value)} />
-            <input className="input" style={{ flex: 1 }} type="number" min="1" max="130" placeholder="min." value={scorerMin} onChange={(e) => setScorerMin(e.target.value)} />
-            <button className="btn btn--primary btn--sm" disabled={saving || !scorerName.trim()}
-              onClick={() => { push({ ...state, scorers: [...state.scorers, { playerName: scorerName.trim(), minute: scorerMin }] }); setScorerName(''); setScorerMin(''); }}>
+            <PlayerSelect players={players} value={scorerId} onChange={setScorerId} style={{ flex: 2 }} placeholder="— strelec —" />
+            <input className="input" style={{ width: 64, flex: 'none' }} type="number" min="1" max="130" placeholder="min." value={scorerMin} onChange={(e) => setScorerMin(e.target.value)} />
+            <button className="btn btn--primary btn--sm" disabled={saving || !scorerId}
+              onClick={() => { push({ ...state, scorers: [...state.scorers, { playerId: scorerId, playerName: nameOf(scorerId), minute: scorerMin }] }); setScorerId(''); setScorerMin(''); }}>
+              Dodaj
+            </button>
+          </div>
+        </div>
+
+        {/* Cards */}
+        <div className="live-block">
+          <span className="live-block__label">Kartoni</span>
+          {(!state.cards || state.cards.length === 0) && <p className="text-muted" style={{ margin: '4px 0' }}>Ni vpisanih kartonov.</p>}
+          {(state.cards || []).map((c, i) => (
+            <div className="live-scorer" key={i}>
+              <span><strong>{c.playerName}</strong> · {c.type === 'red' ? 'rdeči' : 'rumeni'}{c.minute ? ` ${c.minute}'` : ''}</span>
+              <button className="btn btn--sm admin-del" disabled={saving}
+                onClick={() => push({ ...state, cards: state.cards.filter((_, idx) => idx !== i) })}>Odstrani</button>
+            </div>
+          ))}
+          <div className="row" style={{ marginTop: 10, flexWrap: 'nowrap' }}>
+            <PlayerSelect players={players} value={cardId} onChange={setCardId} style={{ flex: 2 }} placeholder="— igralec —" />
+            <select className="select" style={{ width: 96, flex: 'none' }} value={cardType} onChange={(e) => setCardType(e.target.value)}>
+              <option value="yellow">Rumeni</option>
+              <option value="red">Rdeči</option>
+            </select>
+            <input className="input" style={{ width: 64, flex: 'none' }} type="number" min="1" max="130" placeholder="min." value={cardMin} onChange={(e) => setCardMin(e.target.value)} />
+            <button className="btn btn--primary btn--sm" disabled={saving || !cardId}
+              onClick={() => { push({ ...state, cards: [...(state.cards || []), { playerId: cardId, playerName: nameOf(cardId), type: cardType, minute: cardMin }] }); setCardId(''); setCardMin(''); }}>
               Dodaj
             </button>
           </div>

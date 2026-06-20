@@ -6,7 +6,7 @@ import { IconChevronDown } from './icons.jsx';
  * Custom popover (not a native <select>) so the open list matches the theme.
  * Hidden when there is only one season (and no "all" option needed).
  */
-export default function SeasonSelect({ value, onChange, seasons = [], includeAll = false, className = '' }) {
+export default function SeasonSelect({ value, onChange, seasons = [], includeAll = false, alwaysShow = false, className = '' }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -19,7 +19,7 @@ export default function SeasonSelect({ value, onChange, seasons = [], includeAll
     return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey); };
   }, [open]);
 
-  if (!includeAll && (!seasons || seasons.length <= 1)) return null;
+  if (!alwaysShow && !includeAll && (!seasons || seasons.length <= 1)) return null;
 
   const options = includeAll
     ? [{ v: '', label: 'Vse sezone' }, ...seasons.map((s) => ({ v: s, label: s }))]

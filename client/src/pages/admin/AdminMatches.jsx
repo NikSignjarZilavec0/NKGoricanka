@@ -183,8 +183,9 @@ export default function AdminMatches() {
             <div className="field" style={{ flex: 1 }}><label>Tekmovanje</label>
               <input className="input" name="competition" value={form.competition} onChange={onChange} /></div>
             <div className="field" style={{ flex: 1 }}><label>Sezona</label>
-              <input className="input" name="season" list="seasons-m" value={form.season} onChange={onChange} placeholder="2025/26" />
-              <datalist id="seasons-m">{(seasons || []).map((s) => <option key={s} value={s} />)}</datalist></div>
+              <select className="select" name="season" value={form.season} onChange={onChange}>
+                {((seasons || []).includes(form.season) || !form.season ? (seasons || []) : [form.season, ...(seasons || [])]).map((s) => <option key={s} value={s}>{s}</option>)}
+              </select></div>
             <label className="checkbox" style={{ alignSelf: 'center' }}>
               <input type="checkbox" name="isHome" checked={form.isHome} onChange={onChange} /> Domača tekma
             </label>

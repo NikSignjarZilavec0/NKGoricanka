@@ -79,9 +79,9 @@ export default function AdminStandings() {
           <p className="text-muted">Ročni vnos; točke (3·Z + N) in razvrstitev sta samodejni.</p>
         </div>
         <div className="row">
-          <input className="input" style={{ width: 130 }} list="seasons" value={season}
-            onChange={(e) => setSeason(e.target.value)} placeholder="Sezona" />
-          <datalist id="seasons">{(seasons || []).map((s) => <option key={s} value={s} />)}</datalist>
+          <select className="select" style={{ width: 150 }} value={season} onChange={(e) => setSeason(e.target.value)}>
+            {(seasons || []).map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
           <button className="btn btn--primary" onClick={openNew}>+ Nova vrstica</button>
         </div>
       </div>
@@ -119,7 +119,9 @@ export default function AdminStandings() {
             <div className="field" style={{ flex: 2 }}><label>Ekipa *</label>
               <input className="input" name="team" value={form.team} onChange={onChange} required /></div>
             <div className="field" style={{ flex: 1 }}><label>Sezona *</label>
-              <input className="input" name="season" value={form.season} onChange={onChange} required /></div>
+              <select className="select" name="season" value={form.season} onChange={onChange} required>
+                {((seasons || []).includes(form.season) || !form.season ? (seasons || []) : [form.season, ...(seasons || [])]).map((s) => <option key={s} value={s}>{s}</option>)}
+              </select></div>
           </div>
           <div className="row">
             <div className="field" style={{ flex: 2 }}><label>Skupina (npr. Prvenstveni del / Spodnji del)</label>

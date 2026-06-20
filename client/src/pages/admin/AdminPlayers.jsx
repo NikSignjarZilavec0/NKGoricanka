@@ -85,9 +85,9 @@ export default function AdminPlayers() {
       <div className="admin-page-head admin-page-head--row">
         <div><h1>Igralci</h1><p className="text-muted">{items.length} v kadru · sezona {adminSeason}</p></div>
         <div className="row">
-          <input className="input" style={{ width: 130 }} list="seasons-pl" value={adminSeason}
-            onChange={(e) => setAdminSeason(e.target.value)} placeholder="Sezona" />
-          <datalist id="seasons-pl">{(seasons || []).map((s) => <option key={s} value={s} />)}</datalist>
+          <select className="select" style={{ width: 140 }} value={adminSeason} onChange={(e) => setAdminSeason(e.target.value)}>
+            {(seasons || []).map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
           <button className="btn btn--primary" onClick={openNew}>+ Nov igralec</button>
         </div>
       </div>

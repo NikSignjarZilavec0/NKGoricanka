@@ -99,8 +99,9 @@ export default function AdminClub() {
         <div className="row">
           <div className="field" style={{ flex: 1, minWidth: 220 }}>
             <label>Trenutna sezona (privzeto na strani)</label>
-            <input className="input" name="currentSeason" list="seasons-list" value={form.currentSeason} onChange={onChange} placeholder="2025/26" />
-            <datalist id="seasons-list">{seasons.map((s) => <option key={s} value={s} />)}</datalist>
+            <select className="select" name="currentSeason" value={form.currentSeason} onChange={onChange}>
+              {((seasons || []).includes(form.currentSeason) || !form.currentSeason ? (seasons || []) : [form.currentSeason, ...(seasons || [])]).map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
           </div>
         </div>
         <p className="text-muted" style={{ marginTop: -4, fontSize: '0.88rem' }}>

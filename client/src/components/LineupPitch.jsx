@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { imageUrl } from '../api/client.js';
 import { IconBall } from './icons.jsx';
 
@@ -30,8 +31,8 @@ export default function LineupPitch({ lineup = [], scorers = [], className = '' 
       <PitchLines />
       {lineup.map((s, i) => {
         const goals = goalsForSpot(s, scorers);
-        return (
-          <div key={i} className="pitch-player" style={{ left: `${s.x}%`, top: `${s.y}%` }}>
+        const inner = (
+          <>
             {(goals > 0 || s.assists > 0 || s.yellowCards > 0 || s.redCards > 0) && (
               <div className="pitch-player__events">
                 {goals > 0 && <span className="pev pev--goal" title="Goli"><IconBall size={12} />{goals > 1 ? `×${goals}` : ''}</span>}
@@ -47,7 +48,13 @@ export default function LineupPitch({ lineup = [], scorers = [], className = '' 
               {s.number != null && s.number !== '' && <span className="pitch-player__num">{s.number}</span>}
             </div>
             <span className="pitch-player__name">{s.name}</span>
-          </div>
+          </>
+        );
+        const style = { left: `${s.x}%`, top: `${s.y}%` };
+        return s.playerId ? (
+          <Link key={i} to={`/players/${s.playerId}`} className="pitch-player pitch-player--link" style={style}>{inner}</Link>
+        ) : (
+          <div key={i} className="pitch-player" style={style}>{inner}</div>
         );
       })}
     </div>

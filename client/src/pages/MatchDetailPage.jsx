@@ -96,13 +96,19 @@ export default function MatchDetailPage() {
               <ul className="scorer-list">
                 {match.scorers.map((s, i) => {
                   const pid = playerIdFor(s.playerName);
+                  const inner = (
+                    <>
+                      <IconBall />
+                      <strong>{s.playerName}</strong>
+                      {s.minute ? <span className="scorer-list__min">{s.minute}'</span> : null}
+                      {pid && <span className="scorer-list__go" aria-hidden="true">›</span>}
+                    </>
+                  );
                   return (
                     <li key={i}>
-                      <IconBall />{' '}
                       {pid
-                        ? <Link to={`/players/${pid}`} className="scorer-list__link"><strong>{s.playerName}</strong></Link>
-                        : <strong>{s.playerName}</strong>}
-                      {s.minute ? <span className="scorer-list__min">{s.minute}'</span> : null}
+                        ? <Link to={`/players/${pid}`} className="scorer-list__box scorer-list__box--link">{inner}</Link>
+                        : <span className="scorer-list__box">{inner}</span>}
                     </li>
                   );
                 })}

@@ -29,9 +29,8 @@ export default function AboutPage() {
               )}
               <div className="about-fact">
                 <strong className="about-swatches">
-                  <i style={{ background: 'var(--red-400)' }} />
-                  <i style={{ background: 'var(--red-600)' }} />
-                  <i style={{ background: 'var(--red-800)' }} />
+                  <i style={{ background: club?.colors?.primary || 'var(--red-500)' }} />
+                  <i style={{ background: club?.colors?.accent || 'var(--gold)' }} />
                 </strong>
                 <span>Klubske barve</span>
               </div>

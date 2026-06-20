@@ -98,7 +98,6 @@ export default function PlayersPage() {
           ) : (
             <>
               <div className="squad-sort">
-                <span className="squad-sort__label">Razvrsti:</span>
                 {SORTS.map((s) => (
                   <button
                     key={s.key}

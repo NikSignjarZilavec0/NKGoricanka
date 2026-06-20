@@ -1,10 +1,8 @@
 import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
-import News from '../models/News.js';
 import Player from '../models/Player.js';
 import Match from '../models/Match.js';
 import ClubInfo from '../models/ClubInfo.js';
-import { slugify } from '../utils/slugify.js';
 
 /* -------------------------------------------------------------------------- */
 /* All seed content below is REALISTIC PLACEHOLDER data, clearly marked.      */
@@ -72,50 +70,6 @@ const PLAYERS = [
 
 const SEASON = '2025/26';
 
-const NEWS = [
-  {
-    title: 'Pomembna zmaga pred domačimi navijači',
-    content: `Naši fantje so na zadnji domači tekmi navdušili polne tribune in slavili pomembno zmago.
-Po napeti prvi polovici je odločitev padla v drugem polčasu, ko smo izkoristili dve priložnosti
-in zanesljivo zadržali prednost do konca srečanja.
-
-Trener je po tekmi pohvalil ekipni duh in borbenost, navijačem pa se zahvalil za glasno podporo.
-(To je placeholder novica — zamenjajte jo z dejansko vsebino.)`,
-    excerpt: 'Naši fantje so pred polnimi tribunami slavili pomembno zmago v domačem prvenstvu.',
-    published: true,
-  },
-  {
-    title: 'Začetek priprav na spomladanski del sezone',
-    content: `Ekipa je začela s pripravami na spomladanski del sezone. Na sporedu so intenzivni
-treningi in nekaj pripravljalnih tekem, na katerih bo strokovni štab preizkusil različne
-postavitve in dal priložnost mladim igralcem.
-
-Cilj je čim bolje pripravljeni vstopiti v nadaljevanje prvenstva.
-(To je placeholder novica — zamenjajte jo z dejansko vsebino.)`,
-    excerpt: 'Z intenzivnimi treningi in pripravljalnimi tekmami vstopamo v spomladanski del sezone.',
-    published: true,
-  },
-  {
-    title: 'Mladi nogometaši kluba nizajo dobre predstave',
-    content: `Selekcije mlajših kategorij našega kluba dosegajo lepe rezultate in kažejo,
-da je delo z mladimi prava pot. Vabimo vse mlade, ki bi se radi pridružili,
-da se oglasijo na enem od naših treningov.
-
-(To je placeholder novica — zamenjajte jo z dejansko vsebino.)`,
-    excerpt: 'Selekcije mlajših kategorij nizajo dobre predstave — vabljeni novi člani!',
-    published: true,
-  },
-  {
-    title: 'Vabilo na klubski družabni dogodek',
-    content: `Vse člane, navijače in podpornike kluba vabimo na tradicionalni družabni dogodek,
-kjer bomo skupaj obeležili uspehe pretekle sezone in se zahvalili vsem, ki podpirajo NK Goričanko.
-
-(To je placeholder novica — zamenjajte jo z dejansko vsebino.)`,
-    excerpt: 'Vabljeni na tradicionalni klubski družabni dogodek za člane in navijače.',
-    published: true,
-  },
-];
-
 function daysFromNow(days) {
   const d = new Date();
   d.setDate(d.getDate() + days);
@@ -164,18 +118,6 @@ export async function runSeed() {
   if ((await Player.countDocuments()) === 0) {
     await Player.insertMany(PLAYERS);
     console.log(`[seed] Inserted ${PLAYERS.length} players`);
-  }
-
-  if ((await News.countDocuments()) === 0) {
-    const now = Date.now();
-    const docs = NEWS.map((n, i) => ({
-      ...n,
-      slug: slugify(n.title),
-      author: 'NK Goričanka',
-      publishedAt: new Date(now - i * 3 * 24 * 60 * 60 * 1000),
-    }));
-    await News.insertMany(docs);
-    console.log(`[seed] Inserted ${docs.length} news items`);
   }
 
   if ((await Match.countDocuments()) === 0) {

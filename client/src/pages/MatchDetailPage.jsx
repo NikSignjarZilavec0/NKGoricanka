@@ -135,7 +135,7 @@ export default function MatchDetailPage() {
                   return (
                     <li key={i}>
                       {pid
-                        ? <Link to={`/players/${pid}`} className="scorer-list__box scorer-list__box--link">{inner}</Link>
+                        ? <Link to={`/players/${pid}`} state={{ backTo: `/matches/${id}`, backLabel: 'Tekma' }} className="scorer-list__box scorer-list__box--link">{inner}</Link>
                         : <span className="scorer-list__box">{inner}</span>}
                     </li>
                   );
@@ -162,7 +162,7 @@ export default function MatchDetailPage() {
                     return (
                       <li key={i}>
                         {pid
-                          ? <Link to={`/players/${pid}`} className="scorer-list__box scorer-list__box--link">{inner}</Link>
+                          ? <Link to={`/players/${pid}`} state={{ backTo: `/matches/${id}`, backLabel: 'Tekma' }} className="scorer-list__box scorer-list__box--link">{inner}</Link>
                           : <span className="scorer-list__box">{inner}</span>}
                       </li>
                     );
@@ -178,7 +178,7 @@ export default function MatchDetailPage() {
         <section className="section section--tight">
           <div className="container">
             <h2 className="section-title">Postava — {us}</h2>
-            <LineupPitch lineup={match.lineup} scorers={match.scorers || []} cards={match.cards || []} />
+            <LineupPitch lineup={match.lineup} scorers={match.scorers || []} cards={match.cards || []} backTo={`/matches/${id}`} />
           </div>
         </section>
       )}
@@ -187,8 +187,8 @@ export default function MatchDetailPage() {
         <section className="section section--tight">
           <div className="container">
             <h2 className="section-title">Nastopili — {us}</h2>
-            {xi.length > 0 && <RosterTable title="Prva postava" rows={xi} />}
-            {bench.length > 0 && <RosterTable title="Klop" rows={bench} />}
+            {xi.length > 0 && <RosterTable title="Prva postava" rows={xi} backTo={`/matches/${id}`} />}
+            {bench.length > 0 && <RosterTable title="Klop" rows={bench} backTo={`/matches/${id}`} />}
             {match.substitutions?.length > 0 && (
               <div className="roster-block">
                 <h3 className="roster-sub">Zamenjave</h3>
@@ -210,7 +210,7 @@ export default function MatchDetailPage() {
   );
 }
 
-function RosterTable({ title, rows }) {
+function RosterTable({ title, rows, backTo }) {
   return (
     <div className="roster-block">
       <h3 className="roster-sub">{title}</h3>
@@ -232,7 +232,7 @@ function RosterTable({ title, rows }) {
                 <td className="squad__rank">{r.number ?? '–'}</td>
                 <td className="squad__player">
                   <div className="squad__cell">
-                    {r.id ? <Link to={`/players/${r.id}`} className="roster-name">{r.name}</Link> : <span className="roster-name">{r.name}</span>}
+                    {r.id ? <Link to={`/players/${r.id}`} state={backTo ? { backTo, backLabel: 'Tekma' } : undefined} className="roster-name">{r.name}</Link> : <span className="roster-name">{r.name}</span>}
                     {r.isCaptain && <span className="roster-badge roster-badge--c" title="Kapetan">C</span>}
                     {r.isGoalkeeper && <span className="roster-badge roster-badge--gk" title="Vratar">GK</span>}
                   </div>

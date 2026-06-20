@@ -9,9 +9,22 @@ import PageHeader from '../components/PageHeader.jsx';
 import Loader from '../components/Loader.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
+import { IconBall } from '../components/icons.jsx';
 
 const initialsOf = (name) =>
   name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+
+/** Compact event icons for the squad list (icon + count when > 1). */
+function KaderIcons({ s = {} }) {
+  return (
+    <span className="kader-icons">
+      {s.goals > 0 && <span className="kader-ic" title="Goli"><IconBall size={16} />{s.goals > 1 ? s.goals : ''}</span>}
+      {s.assists > 0 && <span className="kader-ic kader-ic--a" title="Asistence"><span className="kader-ic__a">A</span>{s.assists > 1 ? s.assists : ''}</span>}
+      {s.yellowCards > 0 && <span className="kader-ic" title="Rumeni kartoni"><span className="kard kard--y" />{s.yellowCards > 1 ? s.yellowCards : ''}</span>}
+      {s.redCards > 0 && <span className="kader-ic" title="Rdeči kartoni"><span className="kard kard--r" />{s.redCards > 1 ? s.redCards : ''}</span>}
+    </span>
+  );
+}
 
 // Sortable stat categories (label + key in player.stats).
 const SORTS = [
@@ -130,11 +143,26 @@ export default function PlayersPage() {
                   return (
                     <div key={group.key} className="squad-group">
                       <h2 className="section-title squad-group__title">{group.label}</h2>
-                      <div className="card squad-wrap">
-                        <table className="squad">
-                          <thead>{headRow(false)}</thead>
-                          <tbody>{renderRows(list, null)}</tbody>
-                        </table>
+                      <div className="card kader-list">
+                        {list.map((p) => (
+                          <div
+                            key={p._id}
+                            className="kader-row"
+                            role="link"
+                            tabIndex={0}
+                            onClick={() => go(p._id)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') go(p._id); }}
+                          >
+                            <span className="squad__avatar">
+                              {p.photo
+                                ? <img src={imageUrl(p.photo)} alt="" loading="lazy" />
+                                : <span className="squad__avatar-fb">{initialsOf(p.name)}</span>}
+                            </span>
+                            {p.shirtNumber != null && <span className="squad__num">{p.shirtNumber}</span>}
+                            <span className="kader-row__name">{p.name}</span>
+                            <KaderIcons s={p.stats} />
+                          </div>
+                        ))}
                       </div>
                     </div>
                   );

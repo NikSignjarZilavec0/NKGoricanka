@@ -32,7 +32,7 @@ export function eventsForSpot(spot, scorers = [], cards = []) {
 }
 
 /** A football pitch with placed players. Read-only display. */
-export default function LineupPitch({ lineup = [], scorers = [], cards = [], className = '' }) {
+export default function LineupPitch({ lineup = [], scorers = [], cards = [], backTo, className = '' }) {
   return (
     <div className={`pitch ${className}`}>
       <PitchLines />
@@ -59,7 +59,7 @@ export default function LineupPitch({ lineup = [], scorers = [], cards = [], cla
         );
         const style = { left: `${s.x}%`, top: `${s.y}%` };
         return s.playerId ? (
-          <Link key={i} to={`/players/${s.playerId}`} className="pitch-player pitch-player--link" style={style}>{inner}</Link>
+          <Link key={i} to={`/players/${s.playerId}`} state={backTo ? { backTo, backLabel: 'Tekma' } : undefined} className="pitch-player pitch-player--link" style={style}>{inner}</Link>
         ) : (
           <div key={i} className="pitch-player" style={style}>{inner}</div>
         );

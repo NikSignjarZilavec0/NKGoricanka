@@ -30,6 +30,9 @@ export default function LiveControlPage() {
   const [cardId, setCardId] = useState('');
   const [cardType, setCardType] = useState('yellow');
   const [cardMin, setCardMin] = useState('');
+  const [subOnId, setSubOnId] = useState('');
+  const [subOffId, setSubOffId] = useState('');
+  const [subMin, setSubMin] = useState('');
   const [players, setPlayers] = useState([]);
   const nameOf = (pid) => players.find((p) => p._id === pid)?.name || '';
 
@@ -46,6 +49,7 @@ export default function LiveControlPage() {
           theirs: m.score?.theirs ?? 0,
           scorers: (m.scorers || []).map((s) => ({ playerId: s.playerId || '', playerName: s.playerName, minute: s.minute ?? '' })),
           cards: (m.cards || []).map((c) => ({ playerId: c.playerId || '', playerName: c.playerName, type: c.type, minute: c.minute ?? '' })),
+          substitutions: (m.substitutions || []).map((x) => ({ offPlayerId: x.offPlayerId || '', offName: x.offName, onPlayerId: x.onPlayerId || '', onName: x.onName, minute: x.minute ?? '' })),
         });
       })
       .catch((e) => setMsg({ type: 'error', text: errMessage(e, 'Tekma ni najdena.') }))
@@ -65,6 +69,7 @@ export default function LiveControlPage() {
         scoreTheirs: next.theirs,
         scorers: (next.scorers || []).filter((s) => s.playerId),
         cards: (next.cards || []).filter((c) => c.playerId),
+        substitutions: (next.substitutions || []).filter((x) => x.onPlayerId || x.offPlayerId),
       });
       setMatch(updated);
       setMsg({ type: 'success', text: 'Posodobljeno ✓ — vidno na strani v živo' });
@@ -176,6 +181,29 @@ export default function LiveControlPage() {
               onClick={() => { push({ ...state, cards: [...(state.cards || []), { playerId: cardId, playerName: nameOf(cardId), type: cardType, minute: cardMin }] }); setCardId(''); setCardMin(''); }}>
               Dodaj
             </button>
+          </div>
+        </div>
+
+        {/* Substitutions */}
+        <div className="live-block">
+          <span className="live-block__label">Zamenjave</span>
+          {(!state.substitutions || state.substitutions.length === 0) && <p className="text-muted" style={{ margin: '4px 0' }}>Ni vpisanih zamenjav.</p>}
+          {(state.substitutions || []).map((x, i) => (
+            <div className="live-scorer" key={i}>
+              <span><span style={{ color: '#4bd998' }}>▲ {x.onName}</span> <span style={{ color: 'var(--red-300)' }}>▼ {x.offName}</span>{x.minute ? ` ${x.minute}'` : ''}</span>
+              <button className="btn btn--sm admin-del" disabled={saving}
+                onClick={() => push({ ...state, substitutions: state.substitutions.filter((_, idx) => idx !== i) })}>Odstrani</button>
+            </div>
+          ))}
+          <div className="row" style={{ marginTop: 10, flexWrap: 'nowrap' }}>
+            <PlayerSelect players={players} value={subOnId} onChange={setSubOnId} style={{ flex: 1 }} placeholder="— vstopil —" />
+            <PlayerSelect players={players} value={subOffId} onChange={setSubOffId} style={{ flex: 1 }} placeholder="— zamenjal —" />
+            <input className="input" style={{ width: 56, flex: 'none' }} type="number" min="1" max="130" placeholder="min." value={subMin} onChange={(e) => setSubMin(e.target.value)} />
+            <button className="btn btn--primary btn--sm" disabled={saving || (!subOnId && !subOffId)}
+              onClick={() => {
+                push({ ...state, substitutions: [...(state.substitutions || []), { onPlayerId: subOnId, onName: nameOf(subOnId), offPlayerId: subOffId, offName: nameOf(subOffId), minute: subMin }] });
+                setSubOnId(''); setSubOffId(''); setSubMin('');
+              }}>Dodaj</button>
           </div>
         </div>
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { playersApi, matchesApi } from '../api/services.js';
 import { imageUrl, errMessage } from '../api/client.js';
 import { POSITION_LABELS, formatShortDate, ageFrom } from '../utils/format.js';
@@ -12,6 +12,10 @@ import { IconArrowLeft, IconGlobe, IconCalendar, IconRuler, IconBall } from '../
 
 export default function PlayerDetailPage() {
   const { id } = useParams();
+  const location = useLocation();
+  const back = location.state?.backTo
+    ? { to: location.state.backTo, label: location.state.backLabel || 'Nazaj' }
+    : { to: '/players', label: 'Kader' };
   const { season, setSeason, seasons } = usePageSeason();
   const { club } = useClub();
   const [player, setPlayer] = useState(null);
@@ -88,7 +92,7 @@ export default function PlayerDetailPage() {
             )}
           </div>
           <div className="player-hero__info">
-            <Link to="/players" className="player-hero__back"><IconArrowLeft size={18} /> Kader</Link>
+            <Link to={back.to} className="player-hero__back"><IconArrowLeft size={18} /> {back.label}</Link>
             <span className="badge badge--light player-hero__pos">{POSITION_LABELS[player.position]}</span>
             <h1>
               {player.shirtNumber != null && <span className="player-hero__num">{player.shirtNumber}</span>}
@@ -140,10 +144,10 @@ export default function PlayerDetailPage() {
                           </span>
                           <span className="pmatch__ev">
                             {m.started === false && <span className="pmatch__badge pmatch__badge--sub" title="Z klopi">klop</span>}
-                            {m.g > 0 && <span className="pmatch__badge pmatch__badge--g"><IconBall size={12} />{m.g > 1 ? m.g : ''}</span>}
-                            {m.a > 0 && <span className="pmatch__badge pmatch__badge--a">A{m.a > 1 ? m.a : ''}</span>}
-                            {m.y > 0 && <span className="kard kard--y" title="Rumeni karton" />}
-                            {m.r > 0 && <span className="kard kard--r" title="Rdeči karton" />}
+                            {Array.from({ length: m.g }).map((_, k) => <span key={`g${k}`} className="pev-icon pev-icon--g" title="Gol"><IconBall size={15} /></span>)}
+                            {Array.from({ length: m.a }).map((_, k) => <span key={`a${k}`} className="pev-icon pev-icon--a" title="Asistenca">A</span>)}
+                            {Array.from({ length: m.y }).map((_, k) => <span key={`y${k}`} className="kard kard--y" title="Rumeni karton" />)}
+                            {Array.from({ length: m.r }).map((_, k) => <span key={`r${k}`} className="kard kard--r" title="Rdeči karton" />)}
                           </span>
                         </Link>
                       </li>

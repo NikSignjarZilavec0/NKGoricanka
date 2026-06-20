@@ -26,7 +26,12 @@ export default function MatchesPage() {
       matchesApi.list('upcoming', season).catch(() => []),
       matchesApi.list('finished', season).catch(() => []),
     ])
-      .then(([live, upcoming, finished]) => setData({ live, upcoming, finished }))
+      .then(([live, upcoming, finished]) => {
+        setData({ live, upcoming, finished });
+        // Default to "Odigrane" when there are no upcoming matches (avoid an empty tab).
+        if (upcoming.length === 0 && finished.length > 0) setTab('finished');
+        else setTab('upcoming');
+      })
       .finally(() => setLoading(false));
   }, [season]);
 

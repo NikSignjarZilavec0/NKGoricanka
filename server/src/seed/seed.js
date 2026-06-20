@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import Player from '../models/Player.js';
 import Match from '../models/Match.js';
 import ClubInfo from '../models/ClubInfo.js';
+import Standing from '../models/Standing.js';
 
 /* -------------------------------------------------------------------------- */
 /* All seed content below is REALISTIC PLACEHOLDER data, clearly marked.      */
@@ -14,6 +15,8 @@ const CLUB = {
   name: 'NK Goričanka',
   shortName: 'Goričanka',
   foundedYear: 1975, // PLACEHOLDER — preveri uradno leto ustanovitve
+  currentSeason: '2025/26',
+  seasons: ['2025/26'],
   history: `NK Goričanka je nogometni klub iz Goričkega v Prekmurju (območje občine Rogašovci).
 Klub združuje ljubitelje nogometa iz okoliških vasi in že desetletja skrbi za razvoj
 nogometa med mladimi in člani. Domače tekme igra na klubskem igrišču, tekmuje pa v
@@ -42,6 +45,8 @@ nosijo tudi navijači na vsaki tekmi.
     'https://www.openstreetmap.org/export/embed.html?bbox=16.024%2C46.796%2C16.044%2C46.806&layer=mapnik&marker=46.801%2C16.034',
 };
 
+const SEASON = '2025/26';
+
 const PLAYERS = [
   // Goalkeepers
   { name: 'Žan Horvat', position: 'goalkeeper', shirtNumber: 1, birthdate: '1995-03-12', heightCm: 188, nationality: 'Slovenija', stats: { appearances: 22, goals: 0, assists: 0, yellowCards: 2, redCards: 0 } },
@@ -62,13 +67,12 @@ const PLAYERS = [
   { name: 'Marko Kuzma', position: 'forward', shirtNumber: 9, birthdate: '1996-10-11', heightCm: 183, nationality: 'Slovenija', stats: { appearances: 25, goals: 14, assists: 3, yellowCards: 3, redCards: 0 } },
   { name: 'Domen Sukič', position: 'forward', shirtNumber: 11, birthdate: '2000-01-22', heightCm: 181, nationality: 'Slovenija', stats: { appearances: 23, goals: 9, assists: 5, yellowCards: 2, redCards: 0 } },
   { name: 'Žiga Bedernjak', position: 'forward', shirtNumber: 17, birthdate: '2003-07-14', heightCm: 179, nationality: 'Slovenija', stats: { appearances: 14, goals: 5, assists: 2, yellowCards: 1, redCards: 0 } },
-].map((p) => ({
+].map(({ stats, ...p }) => ({
   ...p,
   bio: 'Placeholder opis igralca — uredite ga v administraciji.',
   active: true,
+  seasonStats: { [SEASON]: stats },
 }));
-
-const SEASON = '2025/26';
 
 function daysFromNow(days) {
   const d = new Date();
@@ -106,6 +110,43 @@ export async function ensureAdmin() {
   return true;
 }
 
+/**
+ * One-time, idempotent migration to the multi-season model:
+ *  - Player: legacy { season, stats } -> seasonStats map.
+ *  - ClubInfo.seasons: backfilled from current + matches/standings.
+ * Safe to run on every startup.
+ */
+export async function migrateData() {
+  const players = await Player.find().lean();
+  let migrated = 0;
+  for (const p of players) {
+    const hasSeasonStats = p.seasonStats && Object.keys(p.seasonStats).length > 0;
+    if (!hasSeasonStats && (p.stats || p.season)) {
+      const season = p.season || '2025/26';
+      await Player.collection.updateOne(
+        { _id: p._id },
+        { $set: { seasonStats: { [season]: p.stats || {} } }, $unset: { stats: '', season: '' } }
+      );
+      migrated += 1;
+    } else if (p.season !== undefined || p.stats !== undefined) {
+      await Player.collection.updateOne({ _id: p._id }, { $unset: { stats: '', season: '' } });
+    }
+  }
+  if (migrated) console.log(`[migrate] Converted ${migrated} players to seasonStats`);
+
+  const info = await ClubInfo.findOne({ key: 'singleton' });
+  if (info && (!info.seasons || info.seasons.length === 0)) {
+    const [mSeasons, sSeasons] = await Promise.all([Match.distinct('season'), Standing.distinct('season')]);
+    const all = new Set([...mSeasons, ...sSeasons].filter(Boolean));
+    if (info.currentSeason) all.add(info.currentSeason);
+    info.seasons = [...all].sort().reverse();
+    if (info.seasons.length) {
+      await info.save();
+      console.log(`[migrate] Backfilled seasons: ${info.seasons.join(', ')}`);
+    }
+  }
+}
+
 /** Seed all content if the database is empty. Idempotent. */
 export async function runSeed() {
   await ensureAdmin();
@@ -124,6 +165,8 @@ export async function runSeed() {
     await Match.insertMany(MATCHES);
     console.log(`[seed] Inserted ${MATCHES.length} matches`);
   }
+
+  await migrateData();
 }
 
 // Allow running directly: `npm run seed`

@@ -52,8 +52,9 @@ export default function AdminPlayers() {
     setSaving(true); setError('');
     try {
       const fd = new FormData();
-      ['name', 'season', 'position', 'shirtNumber', 'birthdate', 'heightCm', 'nationality', 'bio', 'active']
+      ['name', 'position', 'shirtNumber', 'birthdate', 'heightCm', 'nationality', 'bio', 'active']
         .forEach((k) => fd.append(k, form[k]));
+      fd.append('season', adminSeason); // stats apply to the selected season
       fd.append('stats', JSON.stringify({
         appearances: Number(form.appearances) || 0, goals: Number(form.goals) || 0,
         assists: Number(form.assists) || 0, yellowCards: Number(form.yellowCards) || 0,
@@ -132,10 +133,6 @@ export default function AdminPlayers() {
                 {Object.entries(POSITION_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
             </div>
-            <div className="field" style={{ flex: 1 }}>
-              <label>Sezona</label>
-              <input className="input" name="season" value={form.season} onChange={onChange} placeholder="2025/26" />
-            </div>
           </div>
           <div className="row">
             <div className="field" style={{ flex: 1 }}><label>Št. dresa</label>
@@ -152,7 +149,11 @@ export default function AdminPlayers() {
             <textarea className="textarea" name="bio" value={form.bio} onChange={onChange} rows={4} />
           </div>
 
-          <h4 className="admin-form-section">Statistika</h4>
+          <h4 className="admin-form-section">Statistika — sezona {adminSeason}</h4>
+          <p className="text-muted" style={{ marginTop: -6, fontSize: '0.85rem' }}>
+            Statistika velja samo za sezono <strong>{adminSeason}</strong>. Osnovni podatki (ime, pozicija, številka,
+            fotografija …) so skupni vsem sezonam. Za drugo sezono zgoraj zamenjaj sezono.
+          </p>
           <div className="row">
             {[['appearances', 'Nastopi'], ['goals', 'Goli'], ['assists', 'Asist.'], ['yellowCards', 'Rumeni'], ['redCards', 'Rdeči']].map(([k, label]) => (
               <div key={k} className="field" style={{ flex: 1 }}>

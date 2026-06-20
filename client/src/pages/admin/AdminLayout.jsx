@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import Logo from '../../components/Logo.jsx';
 import {
   IconDashboard, IconNewspaper, IconUsers, IconCalendar, IconShield, IconTable,
-  IconExternal, IconLogout, IconMenu, IconUser,
+  IconLayers, IconExternal, IconLogout, IconMenu, IconUser,
 } from '../../components/icons.jsx';
 
 const NAV = [
@@ -13,6 +13,7 @@ const NAV = [
   { to: '/admin/players', label: 'Igralci', Icon: IconUsers },
   { to: '/admin/matches', label: 'Tekme', Icon: IconCalendar },
   { to: '/admin/standings', label: 'Lestvica', Icon: IconTable },
+  { to: '/admin/seasons', label: 'Sezone', Icon: IconLayers },
   { to: '/admin/club', label: 'Podatki kluba', Icon: IconShield },
 ];
 

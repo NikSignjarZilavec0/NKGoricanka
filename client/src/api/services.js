@@ -20,7 +20,7 @@ export const newsApi = {
 
 export const playersApi = {
   list: (season) => api.get('/players', { params: season ? { season } : {} }).then((r) => r.data),
-  getById: (id) => api.get(`/players/${id}`).then((r) => r.data),
+  getById: (id, season) => api.get(`/players/${id}`, { params: season ? { season } : {} }).then((r) => r.data),
   create: (formData) => api.post('/players', formData, fd()).then((r) => r.data),
   update: (id, formData) => api.put(`/players/${id}`, formData, fd()).then((r) => r.data),
   remove: (id) => api.delete(`/players/${id}`).then((r) => r.data),

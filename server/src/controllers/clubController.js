@@ -1,19 +1,14 @@
 import ClubInfo from '../models/ClubInfo.js';
 import Match from '../models/Match.js';
-import Player from '../models/Player.js';
 import Standing from '../models/Standing.js';
 import { publicPath } from '../middleware/upload.js';
 
-/** Public: distinct seasons across the site + the current/default season. */
+/** Public: the canonical season list (+ any used by matches/standings) and the current season. */
 export async function seasons(req, res, next) {
   try {
     const info = await getClubInfo();
-    const sets = await Promise.all([
-      Match.distinct('season'),
-      Player.distinct('season'),
-      Standing.distinct('season'),
-    ]);
-    const all = new Set(sets.flat().filter(Boolean));
+    const sets = await Promise.all([Match.distinct('season'), Standing.distinct('season')]);
+    const all = new Set([...(info.seasons || []), ...sets.flat()].filter(Boolean));
     if (info.currentSeason) all.add(info.currentSeason);
     // newest first (string sort works for "YYYY/YY")
     const list = [...all].sort().reverse();
@@ -49,6 +44,18 @@ export async function update(req, res, next) {
     ['name', 'shortName', 'history', 'address', 'email', 'phone', 'mapEmbedUrl', 'currentSeason'].forEach((k) => {
       if (b[k] !== undefined) info[k] = b[k];
     });
+
+    // Season list management (canonical list of seasons).
+    if (b.seasons !== undefined) {
+      const arr = typeof b.seasons === 'string' ? JSON.parse(b.seasons) : b.seasons;
+      if (Array.isArray(arr)) {
+        info.seasons = [...new Set(arr.map((s) => String(s).trim()).filter(Boolean))].sort().reverse();
+      }
+    }
+    // Ensure the current season is always part of the list.
+    if (info.currentSeason && !info.seasons.includes(info.currentSeason)) {
+      info.seasons = [...new Set([info.currentSeason, ...info.seasons])].sort().reverse();
+    }
     if (b.foundedYear !== undefined && b.foundedYear !== '')
       info.foundedYear = Number(b.foundedYear);
     if (b.latitude !== undefined && b.latitude !== '') info.latitude = Number(b.latitude);

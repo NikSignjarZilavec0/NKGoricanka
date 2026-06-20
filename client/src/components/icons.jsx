@@ -131,6 +131,13 @@ export const IconTable = (p) => (
 
 export const IconChevronDown = (p) => <Svg {...p}><path d="m6 9 6 6 6-6" /></Svg>;
 
+export const IconLayers = (p) => (
+  <Svg {...p}>
+    <path d="m12 2 9 5-9 5-9-5 9-5Z" />
+    <path d="m3 12 9 5 9-5M3 17l9 5 9-5" />
+  </Svg>
+);
+
 export const IconInbox = (p) => (
   <Svg {...p}>
     <path d="M22 12h-5l-2 3h-6l-2-3H2" />

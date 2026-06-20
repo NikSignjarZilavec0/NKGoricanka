@@ -3,12 +3,15 @@ import { useParams, Link } from 'react-router-dom';
 import { playersApi } from '../api/services.js';
 import { imageUrl, errMessage } from '../api/client.js';
 import { POSITION_LABELS, formatDate, ageFrom } from '../utils/format.js';
+import { usePageSeason } from '../context/SeasonContext.jsx';
+import SeasonSelect from '../components/SeasonSelect.jsx';
 import Loader from '../components/Loader.jsx';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
 import { IconArrowLeft, IconGlobe, IconCalendar, IconRuler } from '../components/icons.jsx';
 
 export default function PlayerDetailPage() {
   const { id } = useParams();
+  const { season, setSeason, seasons } = usePageSeason();
   const [player, setPlayer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -16,11 +19,11 @@ export default function PlayerDetailPage() {
   useEffect(() => {
     setLoading(true);
     playersApi
-      .getById(id)
+      .getById(id, season)
       .then(setPlayer)
       .catch((e) => setError(errMessage(e, 'Igralec ni najden.')))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, season]);
 
   useDocumentTitle(player?.name || 'Igralec');
 
@@ -78,7 +81,10 @@ export default function PlayerDetailPage() {
         <div className="container">
           <div className="grid grid--2 player-detail">
             <div>
-              <h2 className="section-title">Statistika sezone</h2>
+              <div className="section-head" style={{ marginBottom: 18 }}>
+                <h2 className="section-title" style={{ margin: 0 }}>Statistika{season ? ` ${season}` : ' (vse sezone)'}</h2>
+                <SeasonSelect value={season} onChange={setSeason} seasons={seasons} includeAll />
+              </div>
               <div className="stat-grid">
                 {statItems.map((s) => (
                   <div key={s.label} className="stat-box">

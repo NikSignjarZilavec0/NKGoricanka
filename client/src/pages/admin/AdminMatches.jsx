@@ -5,6 +5,7 @@ import { formatDateTime, STATUS_LABELS, toDateTimeInput } from '../../utils/form
 import Modal from '../../components/Modal.jsx';
 import Loader from '../../components/Loader.jsx';
 import useDocumentTitle from '../../hooks/useDocumentTitle.js';
+import { useSeason } from '../../context/SeasonContext.jsx';
 
 const EMPTY = {
   opponent: '', isHome: true, date: '', location: '', competition: '1. MNL Murska Sobota',
@@ -12,6 +13,7 @@ const EMPTY = {
 };
 
 export default function AdminMatches() {
+  const { seasons } = useSeason();
   const [items, setItems] = useState(null);
   const [players, setPlayers] = useState([]);
   const [modal, setModal] = useState(false);
@@ -162,7 +164,8 @@ export default function AdminMatches() {
             <div className="field" style={{ flex: 1 }}><label>Tekmovanje</label>
               <input className="input" name="competition" value={form.competition} onChange={onChange} /></div>
             <div className="field" style={{ flex: 1 }}><label>Sezona</label>
-              <input className="input" name="season" value={form.season} onChange={onChange} placeholder="2025/26" /></div>
+              <input className="input" name="season" list="seasons-m" value={form.season} onChange={onChange} placeholder="2025/26" />
+              <datalist id="seasons-m">{(seasons || []).map((s) => <option key={s} value={s} />)}</datalist></div>
             <label className="checkbox" style={{ alignSelf: 'center' }}>
               <input type="checkbox" name="isHome" checked={form.isHome} onChange={onChange} /> Domača tekma
             </label>

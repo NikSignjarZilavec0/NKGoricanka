@@ -24,6 +24,7 @@ import AdminNews from './pages/admin/AdminNews.jsx';
 import AdminPlayers from './pages/admin/AdminPlayers.jsx';
 import AdminMatches from './pages/admin/AdminMatches.jsx';
 import AdminStandings from './pages/admin/AdminStandings.jsx';
+import AdminSeasons from './pages/admin/AdminSeasons.jsx';
 import AdminClub from './pages/admin/AdminClub.jsx';
 
 export default function App() {
@@ -63,6 +64,7 @@ export default function App() {
           <Route path="players" element={<AdminPlayers />} />
           <Route path="matches" element={<AdminMatches />} />
           <Route path="standings" element={<AdminStandings />} />
+          <Route path="seasons" element={<AdminSeasons />} />
           <Route path="club" element={<AdminClub />} />
         </Route>
       </Routes>

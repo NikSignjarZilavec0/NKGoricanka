@@ -104,9 +104,8 @@ export default function AdminClub() {
           </div>
         </div>
         <p className="text-muted" style={{ marginTop: -4, fontSize: '0.88rem' }}>
-          <strong>Novo sezono (npr. 2026/27) dodaš tako, da jo vpišeš sem</strong> in shraniš — postane privzeta sezona,
-          ki jo obiskovalci vidijo. Nato pri Igralcih, Tekmah in Lestvici vsakemu vnosu nastaviš to sezono.
-          Obstoječe sezone: {seasons.length ? seasons.join(', ') : '—'}.
+          To je sezona, ki jo obiskovalci vidijo privzeto. Sezone dodajaš in upravljaš na strani
+          <strong> Sezone</strong> (v meniju levo). Obstoječe sezone: {seasons.length ? seasons.join(', ') : '—'}.
         </p>
 
         <div className="field"><label>Zgodovina</label>

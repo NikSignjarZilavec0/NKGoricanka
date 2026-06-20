@@ -16,7 +16,6 @@ const statsSchema = new mongoose.Schema(
 const playerSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
-    season: { type: String, default: '', index: true },
     position: { type: String, enum: POSITIONS, required: true },
     shirtNumber: { type: Number, min: 1, max: 99 },
     birthdate: { type: Date },
@@ -25,7 +24,9 @@ const playerSchema = new mongoose.Schema(
     bio: { type: String, default: '' },
     nationality: { type: String, default: 'Slovenija' },
     active: { type: Boolean, default: true },
-    stats: { type: statsSchema, default: () => ({}) },
+    // A player exists across ALL seasons; only their stats differ per season.
+    // Keyed by season string, e.g. { "2025/26": { goals: 3, ... } }.
+    seasonStats: { type: Map, of: statsSchema, default: () => ({}) },
   },
   { timestamps: true, versionKey: false }
 );

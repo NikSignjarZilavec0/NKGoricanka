@@ -1,20 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { playersApi } from '../api/services.js';
+import { playersApi, matchesApi } from '../api/services.js';
 import { imageUrl, errMessage } from '../api/client.js';
-import { POSITION_LABELS, formatDate, ageFrom } from '../utils/format.js';
+import { POSITION_LABELS, formatShortDate, ageFrom } from '../utils/format.js';
 import { usePageSeason } from '../context/SeasonContext.jsx';
+import { useClub } from '../context/ClubContext.jsx';
 import SeasonSelect from '../components/SeasonSelect.jsx';
 import Loader from '../components/Loader.jsx';
 import useDocumentTitle from '../hooks/useDocumentTitle.js';
-import { IconArrowLeft, IconGlobe, IconCalendar, IconRuler } from '../components/icons.jsx';
+import { IconArrowLeft, IconGlobe, IconCalendar, IconRuler, IconBall } from '../components/icons.jsx';
 
 export default function PlayerDetailPage() {
   const { id } = useParams();
   const { season, setSeason, seasons } = usePageSeason();
+  const { club } = useClub();
   const [player, setPlayer] = useState(null);
+  const [matches, setMatches] = useState([]);
+  const [shown, setShown] = useState(6);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const us = club?.shortName || 'Goričanka';
 
   useEffect(() => {
     setLoading(true);
@@ -24,6 +29,11 @@ export default function PlayerDetailPage() {
       .catch((e) => setError(errMessage(e, 'Igralec ni najden.')))
       .finally(() => setLoading(false));
   }, [id, season]);
+
+  useEffect(() => {
+    setShown(6);
+    matchesApi.list('finished', season).then(setMatches).catch(() => setMatches([]));
+  }, [season, id]);
 
   useDocumentTitle(player?.name || 'Igralec');
 
@@ -41,6 +51,7 @@ export default function PlayerDetailPage() {
   const initials = player.name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
   const age = ageFrom(player.birthdate);
   const stats = player.stats || {};
+  const pid = String(player._id);
 
   const statItems = [
     { label: 'Nastopi', value: stats.appearances ?? 0 },
@@ -49,6 +60,21 @@ export default function PlayerDetailPage() {
     { label: 'Rumeni kartoni', value: stats.yellowCards ?? 0 },
     { label: 'Rdeči kartoni', value: stats.redCards ?? 0 },
   ];
+
+  // Matches this player took part in (appeared / scored / assisted / carded), newest first.
+  const playerMatches = matches
+    .filter((m) =>
+      (m.appearances || []).some((a) => String(a.playerId) === pid) ||
+      (m.scorers || []).some((s) => String(s.playerId) === pid || String(s.assistPlayerId) === pid) ||
+      (m.cards || []).some((c) => String(c.playerId) === pid))
+    .map((m) => ({
+      id: m._id, date: m.date, opponent: m.opponent, isHome: m.isHome, score: m.score,
+      g: (m.scorers || []).filter((s) => String(s.playerId) === pid).length,
+      a: (m.scorers || []).filter((s) => String(s.assistPlayerId) === pid).length,
+      y: (m.cards || []).filter((c) => c.type === 'yellow' && String(c.playerId) === pid).length,
+      r: (m.cards || []).filter((c) => c.type === 'red' && String(c.playerId) === pid).length,
+      started: (m.appearances || []).find((ap) => String(ap.playerId) === pid)?.started,
+    }));
 
   return (
     <>
@@ -63,14 +89,14 @@ export default function PlayerDetailPage() {
           </div>
           <div className="player-hero__info">
             <Link to="/players" className="player-hero__back"><IconArrowLeft size={18} /> Kader</Link>
-            <span className="badge badge--light">{POSITION_LABELS[player.position]}</span>
+            <span className="badge badge--light player-hero__pos">{POSITION_LABELS[player.position]}</span>
             <h1>
               {player.shirtNumber != null && <span className="player-hero__num">{player.shirtNumber}</span>}
               {player.name}
             </h1>
             <div className="player-hero__facts">
               {player.nationality && <span><IconGlobe /> {player.nationality}</span>}
-              {player.birthdate && <span><IconCalendar /> {formatDate(player.birthdate)}{age != null ? ` (${age} let)` : ''}</span>}
+              {player.birthdate && <span><IconCalendar /> {formatShortDate(player.birthdate)}{age != null ? ` (${age} let)` : ''}</span>}
               {player.heightCm && <span><IconRuler /> {player.heightCm} cm</span>}
             </div>
           </div>
@@ -81,8 +107,8 @@ export default function PlayerDetailPage() {
         <div className="container">
           <div className="grid grid--2 player-detail">
             <div>
-              <div className="section-head" style={{ marginBottom: 18 }}>
-                <h2 className="section-title" style={{ margin: 0 }}>Statistika{season ? ` ${season}` : ' (vse sezone)'}</h2>
+              <h2 className="section-title">Statistika</h2>
+              <div className="player-season-pick">
                 <SeasonSelect value={season} onChange={setSeason} seasons={seasons} includeAll />
               </div>
               <div className="stat-grid">
@@ -94,9 +120,42 @@ export default function PlayerDetailPage() {
                 ))}
               </div>
             </div>
+
             <div>
-              <h2 className="section-title">O igralcu</h2>
-              <p>{player.bio || 'Opis igralca bo kmalu dodan.'}</p>
+              <h2 className="section-title">Zadnje tekme</h2>
+              {playerMatches.length === 0 ? (
+                <p className="text-muted">{player.bio || 'Za izbrano sezono ni zabeleženih nastopov.'}</p>
+              ) : (
+                <>
+                  <ul className="pmatch-list">
+                    {playerMatches.slice(0, shown).map((m) => (
+                      <li key={m.id}>
+                        <Link to={`/matches/${m.id}`} className="pmatch">
+                          <span className="pmatch__date">{formatShortDate(m.date)}</span>
+                          <span className="pmatch__opp">
+                            {m.isHome ? `${us} – ${m.opponent}` : `${m.opponent} – ${us}`}
+                            {m.score?.ours != null && (
+                              <span className="pmatch__score">{m.isHome ? `${m.score.ours}:${m.score.theirs}` : `${m.score.theirs}:${m.score.ours}`}</span>
+                            )}
+                          </span>
+                          <span className="pmatch__ev">
+                            {m.started === false && <span className="pmatch__badge pmatch__badge--sub" title="Z klopi">klop</span>}
+                            {m.g > 0 && <span className="pmatch__badge pmatch__badge--g"><IconBall size={12} />{m.g > 1 ? m.g : ''}</span>}
+                            {m.a > 0 && <span className="pmatch__badge pmatch__badge--a">A{m.a > 1 ? m.a : ''}</span>}
+                            {m.y > 0 && <span className="kard kard--y" title="Rumeni karton" />}
+                            {m.r > 0 && <span className="kard kard--r" title="Rdeči karton" />}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  {shown < playerMatches.length && (
+                    <button className="btn btn--outline btn--sm" onClick={() => setShown((s) => s + 6)} style={{ marginTop: 6 }}>
+                      Naloži več ({playerMatches.length - shown})
+                    </button>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>

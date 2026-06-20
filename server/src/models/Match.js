@@ -28,11 +28,24 @@ const cardSchema = new mongoose.Schema(
   { _id: false }
 );
 
-// One of our players who appeared (played) in the match.
+// One of our players who appeared (played) in the match. started = in the XI.
 const appearanceSchema = new mongoose.Schema(
   {
     playerId: { type: ObjectId, ref: 'Player', default: null },
     playerName: { type: String, required: true, trim: true },
+    started: { type: Boolean, default: false },
+  },
+  { _id: false }
+);
+
+// A substitution: `on` comes in for `off`.
+const substitutionSchema = new mongoose.Schema(
+  {
+    offPlayerId: { type: ObjectId, ref: 'Player', default: null },
+    offName: { type: String, default: '' },
+    onPlayerId: { type: ObjectId, ref: 'Player', default: null },
+    onName: { type: String, default: '' },
+    minute: { type: Number, min: 1, max: 130 },
   },
   { _id: false }
 );
@@ -76,6 +89,7 @@ const matchSchema = new mongoose.Schema(
     scorers: { type: [scorerSchema], default: [] },
     cards: { type: [cardSchema], default: [] },
     appearances: { type: [appearanceSchema], default: [] },
+    substitutions: { type: [substitutionSchema], default: [] },
     lineup: { type: [lineupSpotSchema], default: [] },
     // Live coverage
     minute: { type: Number, min: 0, max: 130, default: null }, // current match minute

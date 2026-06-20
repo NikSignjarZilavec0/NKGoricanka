@@ -54,14 +54,16 @@ export default function PlayersPage() {
         >
           {highlight && <td className="squad__rank">{i + 1}</td>}
           <td className="squad__player">
-            <span className="squad__avatar">
-              {p.photo
-                ? <img src={imageUrl(p.photo)} alt="" loading="lazy" />
-                : <span className="squad__avatar-fb">{initialsOf(p.name)}</span>}
-            </span>
-            {p.shirtNumber != null && <span className="squad__num">{p.shirtNumber}</span>}
-            <span className="squad__name">{p.name}</span>
-            {highlight && <span className="squad__pos-tag">{POSITION_LABELS[p.position]}</span>}
+            <div className="squad__cell">
+              <span className="squad__avatar">
+                {p.photo
+                  ? <img src={imageUrl(p.photo)} alt="" loading="lazy" />
+                  : <span className="squad__avatar-fb">{initialsOf(p.name)}</span>}
+              </span>
+              {p.shirtNumber != null && <span className="squad__num">{p.shirtNumber}</span>}
+              <span className="squad__name">{p.name}</span>
+              {highlight && <span className="squad__pos-tag">{POSITION_LABELS[p.position]}</span>}
+            </div>
           </td>
           <td className={highlight === 'appearances' ? 'is-sorted' : ''}>{s.appearances ?? 0}</td>
           <td className={highlight === 'goals' ? 'is-sorted' : ''}>{s.goals ?? 0}</td>

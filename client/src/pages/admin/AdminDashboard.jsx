@@ -57,13 +57,11 @@ export default function AdminDashboard() {
         <h3>Hitra navodila</h3>
         <ul>
           <li><strong>Novice</strong> — dodajaj objave, naloži naslovno sliko, objavi ali skrij.</li>
-          <li><strong>Igralci</strong> — uredi kader, fotografije in statistiko.</li>
-          <li><strong>Tekme</strong> — vnesi razpored, rezultate in strelce.</li>
-          <li><strong>Podatki kluba</strong> — zgodovina, kontakt, barve in družbena omrežja.</li>
+          <li><strong>Igralci</strong> — uredi kader in fotografije. <em>Statistika (goli, asistence, kartoni, nastopi) se računa samodejno iz tekem.</em></li>
+          <li><strong>Tekme</strong> — vnesi razpored, rezultate, strelce (+ asistence), kartone, nastope (prva postava / klop) in zamenjave. Tu je tudi <strong>Postava</strong> (drag &amp; drop) in <strong>Živo</strong>.</li>
+          <li><strong>Lestvica</strong> in <strong>Sezone</strong> — ročni vnos lestvice; dodajanje sezon (igralci so v vseh sezonah, statistika je per sezono).</li>
+          <li><strong>Podatki kluba</strong> — zgodovina, kontakt, barve, grb, fotografija ekipe in družbena omrežja.</li>
         </ul>
-        <p className="text-muted">
-          Začetni podatki so demonstracijski (placeholder) — zamenjaj jih z dejanskimi.
-        </p>
       </div>
     </>
   );

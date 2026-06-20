@@ -49,7 +49,21 @@ function parseAppearances(body) {
   if (arr === undefined) return undefined;
   return arr
     .filter((a) => a && a.playerName)
-    .map((a) => ({ playerId: idOrNull(a.playerId), playerName: String(a.playerName).trim() }));
+    .map((a) => ({ playerId: idOrNull(a.playerId), playerName: String(a.playerName).trim(), started: Boolean(a.started) }));
+}
+
+function parseSubstitutions(body) {
+  const arr = parseJsonArray(body.substitutions);
+  if (arr === undefined) return undefined;
+  return arr
+    .filter((s) => s && (s.onPlayerId || s.offPlayerId || s.onName || s.offName))
+    .map((s) => ({
+      offPlayerId: idOrNull(s.offPlayerId),
+      offName: s.offName ? String(s.offName).trim() : '',
+      onPlayerId: idOrNull(s.onPlayerId),
+      onName: s.onName ? String(s.onName).trim() : '',
+      minute: minuteOr1(s.minute),
+    }));
 }
 
 function clampPct(v) {
@@ -100,6 +114,8 @@ function buildFields(body, file) {
   if (cards !== undefined) fields.cards = cards;
   const appearances = parseAppearances(body);
   if (appearances !== undefined) fields.appearances = appearances;
+  const substitutions = parseSubstitutions(body);
+  if (substitutions !== undefined) fields.substitutions = substitutions;
   const lineup = parseLineup(body);
   if (lineup !== undefined) fields.lineup = lineup;
   if (file) fields.opponentLogo = publicPath(file);

@@ -23,7 +23,8 @@ export default function AdminMatches() {
   const [form, setForm] = useState(EMPTY);
   const [scorers, setScorers] = useState([]);
   const [cards, setCards] = useState([]);
-  const [appearances, setAppearances] = useState([]); // [{ playerId, playerName }]
+  const [appearances, setAppearances] = useState([]); // [{ playerId, playerName, started }]
+  const [subs, setSubs] = useState([]); // [{ offPlayerId, offName, onPlayerId, onName, minute }]
   const [file, setFile] = useState(null);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -74,7 +75,7 @@ export default function AdminMatches() {
   };
 
   const openNew = () => {
-    setEditing(null); setForm(EMPTY); setScorers([]); setCards([]); setAppearances([]);
+    setEditing(null); setForm(EMPTY); setScorers([]); setCards([]); setAppearances([]); setSubs([]);
     setFile(null); setError(''); setModal(true);
   };
   const openEdit = (m) => {
@@ -92,7 +93,10 @@ export default function AdminMatches() {
     setCards((m.cards || []).map((c) => ({
       playerId: c.playerId || '', playerName: c.playerName || '', type: c.type || 'yellow', minute: c.minute ?? '',
     })));
-    setAppearances((m.appearances || []).map((a) => ({ playerId: a.playerId || '', playerName: a.playerName || '' })));
+    setAppearances((m.appearances || []).map((a) => ({ playerId: a.playerId || '', playerName: a.playerName || '', started: !!a.started })));
+    setSubs((m.substitutions || []).map((s) => ({
+      offPlayerId: s.offPlayerId || '', offName: s.offName || '', onPlayerId: s.onPlayerId || '', onName: s.onName || '', minute: s.minute ?? '',
+    })));
     setModal(true);
   };
 
@@ -113,12 +117,21 @@ export default function AdminMatches() {
   const patchCard = (i, patch) => setCards((c) => c.map((cd, idx) => (idx === i ? { ...cd, ...patch } : cd)));
   const removeCard = (i) => setCards((c) => c.filter((_, idx) => idx !== i));
 
-  // Appearances (who played)
-  const isAppearing = (id) => appearances.some((a) => a.playerId === id);
-  const toggleAppearance = (p) => setAppearances((a) =>
-    a.some((x) => x.playerId === p._id) ? a.filter((x) => x.playerId !== p._id) : [...a, { playerId: p._id, playerName: p.name }]);
-  const selectAllActive = () => setAppearances(players.filter((p) => p.active !== false).map((p) => ({ playerId: p._id, playerName: p.name })));
+  // Appearances (who played): 'xi' (started) | 'bench' | 'none'
+  const statusOf = (id) => {
+    const a = appearances.find((x) => x.playerId === id);
+    return a ? (a.started ? 'xi' : 'bench') : 'none';
+  };
+  const setStatus = (p, st) => setAppearances((a) => {
+    const rest = a.filter((x) => x.playerId !== p._id);
+    return st === 'none' ? rest : [...rest, { playerId: p._id, playerName: p.name, started: st === 'xi' }];
+  });
   const clearAppearances = () => setAppearances([]);
+
+  // Substitutions
+  const addSub = () => setSubs((s) => [...s, { offPlayerId: '', offName: '', onPlayerId: '', onName: '', minute: '' }]);
+  const patchSub = (i, patch) => setSubs((s) => s.map((x, idx) => (idx === i ? { ...x, ...patch } : x)));
+  const removeSub = (i) => setSubs((s) => s.filter((_, idx) => idx !== i));
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -141,7 +154,12 @@ export default function AdminMatches() {
           playerId: c.playerId, playerName: c.playerName || nameOf(c.playerId), type: c.type, minute: c.minute,
         }))));
       fd.append('appearances', JSON.stringify(
-        appearances.filter((a) => a.playerId).map((a) => ({ playerId: a.playerId, playerName: a.playerName || nameOf(a.playerId) }))));
+        appearances.filter((a) => a.playerId).map((a) => ({ playerId: a.playerId, playerName: a.playerName || nameOf(a.playerId), started: !!a.started }))));
+      fd.append('substitutions', JSON.stringify(
+        subs.filter((s) => s.offPlayerId || s.onPlayerId).map((s) => ({
+          offPlayerId: s.offPlayerId || null, offName: s.offPlayerId ? (s.offName || nameOf(s.offPlayerId)) : '',
+          onPlayerId: s.onPlayerId || null, onName: s.onPlayerId ? (s.onName || nameOf(s.onPlayerId)) : '', minute: s.minute,
+        }))));
       if (file) fd.append('opponentLogo', file);
       if (editing) await matchesApi.update(editing._id, fd);
       else await matchesApi.create(fd);
@@ -262,19 +280,38 @@ export default function AdminMatches() {
               ))}
 
               <h4 className="admin-form-section">
-                Nastopi (kdo je igral)
-                <button type="button" className="btn btn--outline btn--sm" onClick={selectAllActive}>Vsi aktivni</button>
+                Nastopi — prva postava / klop
                 <button type="button" className="btn btn--outline btn--sm" onClick={clearAppearances}>Počisti</button>
               </h4>
-              <p className="text-muted" style={{ marginTop: -6, fontSize: '0.84rem' }}>Izbrani igralci dobijo nastop pri tej tekmi. (Strelci in kartonirani se štejejo samodejno.)</p>
+              <p className="text-muted" style={{ marginTop: -6, fontSize: '0.84rem' }}>Označi, kdo je v prvi postavi (Prva) in kdo na klopi (Klop). Oboji dobijo nastop.</p>
               <div className="appear-grid">
-                {players.filter((p) => p.active !== false).map((p) => (
-                  <label key={p._id} className={`appear-chip ${isAppearing(p._id) ? 'is-on' : ''}`}>
-                    <input type="checkbox" checked={isAppearing(p._id)} onChange={() => toggleAppearance(p)} />
-                    {p.shirtNumber != null ? `${p.shirtNumber}. ` : ''}{p.name}
-                  </label>
-                ))}
+                {players.filter((p) => p.active !== false).map((p) => {
+                  const st = statusOf(p._id);
+                  return (
+                    <div key={p._id} className={`appear-row appear-row--${st}`}>
+                      <span className="appear-row__nm">{p.shirtNumber != null ? `${p.shirtNumber}. ` : ''}{p.name}</span>
+                      <select className="select appear-row__sel" value={st} onChange={(e) => setStatus(p, e.target.value)}>
+                        <option value="none">—</option>
+                        <option value="xi">Prva</option>
+                        <option value="bench">Klop</option>
+                      </select>
+                    </div>
+                  );
+                })}
               </div>
+
+              <h4 className="admin-form-section">Zamenjave <button type="button" className="btn btn--outline btn--sm" onClick={addSub}>+ Dodaj zamenjavo</button></h4>
+              {subs.length === 0 && <p className="text-muted">Ni vnesenih zamenjav.</p>}
+              {subs.map((s, i) => (
+                <div className="row scorer-row" key={i} style={{ flexWrap: 'nowrap', alignItems: 'center' }}>
+                  <span className="sub-arrow sub-arrow--in" title="vstopil">▲</span>
+                  <PlayerSelect players={players} value={s.onPlayerId} onChange={(id) => patchSub(i, { onPlayerId: id, onName: nameOf(id) })} style={{ flex: 2 }} placeholder="— vstopil —" />
+                  <span className="sub-arrow sub-arrow--out" title="zamenjal">▼</span>
+                  <PlayerSelect players={players} value={s.offPlayerId} onChange={(id) => patchSub(i, { offPlayerId: id, offName: nameOf(id) })} style={{ flex: 2 }} placeholder="— zamenjal —" />
+                  <input className="input" style={{ width: 64, flex: 'none' }} type="number" min="1" max="130" placeholder="min." value={s.minute} onChange={(e) => patchSub(i, { minute: e.target.value })} />
+                  <button type="button" className="btn btn--sm admin-del" onClick={() => removeSub(i)}>✕</button>
+                </div>
+              ))}
             </>
           )}
 

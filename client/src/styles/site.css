@@ -692,6 +692,16 @@
   .player-hero__facts { font-size: 0.86rem; }
 }
 
+/* Match participants table: collapse to fit the screen (no horizontal scroll) */
+@media (max-width: 600px) {
+  .roster-table { min-width: 0; width: 100%; }
+  .roster-table th, .roster-table td { padding: 10px 6px; }
+  .roster-table .squad__rank { width: 24px; }
+  .roster-table .squad__player { min-width: 0; }
+  .roster-table .roster-name { font-size: 0.92rem; }
+  .roster-ev__wrap { gap: 3px; }
+}
+
 /* Standings: drop W/D/L on phones so position, played, GD and points all fit */
 @media (max-width: 560px) {
   .col-hide-sm { display: none; }

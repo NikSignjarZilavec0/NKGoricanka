@@ -149,7 +149,7 @@ export default function LiveControlPage() {
                 onClick={() => push({ ...state, scorers: state.scorers.filter((_, idx) => idx !== i) })}>Odstrani</button>
             </div>
           ))}
-          <div className="row" style={{ marginTop: 10, flexWrap: 'nowrap' }}>
+          <div className="row ev-row" style={{ marginTop: 10 }}>
             <PlayerSelect players={players} value={scorerId} onChange={setScorerId} style={{ flex: 2 }} placeholder="— strelec —" />
             <input className="input" style={{ width: 64, flex: 'none' }} type="number" min="1" max="130" placeholder="min." value={scorerMin} onChange={(e) => setScorerMin(e.target.value)} />
             <button className="btn btn--primary btn--sm" disabled={saving || !scorerId}
@@ -170,7 +170,7 @@ export default function LiveControlPage() {
                 onClick={() => push({ ...state, cards: state.cards.filter((_, idx) => idx !== i) })}>Odstrani</button>
             </div>
           ))}
-          <div className="row" style={{ marginTop: 10, flexWrap: 'nowrap' }}>
+          <div className="row ev-row" style={{ marginTop: 10 }}>
             <PlayerSelect players={players} value={cardId} onChange={setCardId} style={{ flex: 2 }} placeholder="— igralec —" />
             <select className="select" style={{ width: 96, flex: 'none' }} value={cardType} onChange={(e) => setCardType(e.target.value)}>
               <option value="yellow">Rumeni</option>
@@ -195,7 +195,7 @@ export default function LiveControlPage() {
                 onClick={() => push({ ...state, substitutions: state.substitutions.filter((_, idx) => idx !== i) })}>Odstrani</button>
             </div>
           ))}
-          <div className="row" style={{ marginTop: 10, flexWrap: 'nowrap' }}>
+          <div className="row ev-row" style={{ marginTop: 10 }}>
             <PlayerSelect players={players} value={subOnId} onChange={setSubOnId} style={{ flex: 1 }} placeholder="— vstopil —" />
             <PlayerSelect players={players} value={subOffId} onChange={setSubOffId} style={{ flex: 1 }} placeholder="— zamenjal —" />
             <input className="input" style={{ width: 56, flex: 'none' }} type="number" min="1" max="130" placeholder="min." value={subMin} onChange={(e) => setSubMin(e.target.value)} />

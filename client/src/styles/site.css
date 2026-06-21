@@ -667,3 +667,53 @@
   .lineup-editor__grid { grid-template-columns: 1fr; }
   .pitch--edit { max-width: 320px; }
 }
+
+.ev-row { flex-wrap: nowrap; }
+
+/* ============================ Mobile polish ============================= */
+@media (max-width: 600px) {
+  /* tighter vertical rhythm so there's less endless scrolling */
+  .section { padding: 46px 0; }
+  .section--tight { padding: 32px 0; }
+  .container { padding: 0 16px; }
+  .page-header { padding: 40px 0 30px; }
+  .player-hero { padding: 32px 0; }
+  .section-title::after { margin-top: 9px; }
+
+  /* page header: stack title and the season picker, picker left-aligned */
+  .page-header__inner { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .page-header__aside { padding-bottom: 0; }
+
+  /* match scoreboard a touch smaller */
+  .match-detail__score { font-size: 2.4rem; }
+
+  /* player profile: photo + info centered */
+  .player-hero__inner { gap: 20px; }
+  .player-hero__facts { font-size: 0.86rem; }
+}
+
+/* Standings: drop W/D/L on phones so position, played, GD and points all fit */
+@media (max-width: 560px) {
+  .col-hide-sm { display: none; }
+  .standings { min-width: 0; }
+  .standings th, .standings td { padding: 11px 5px; font-size: 0.92rem; }
+  .standings__pos { width: 26px; }
+  .standings__team { gap: 8px; }
+  .standings__crest { width: 22px; height: 22px; }
+  .standings-group { margin-bottom: 32px; }
+}
+
+/* Admin event rows (scorers/cards/subs) stack on phones instead of squishing */
+@media (max-width: 600px) {
+  .ev-row { flex-wrap: wrap !important; }
+  .ev-row > .select, .ev-row > .input[type="number"] { flex: 1 1 100% !important; width: 100% !important; min-width: 0 !important; }
+  .ev-row .admin-del { margin-left: auto; }
+  .appear-grid { grid-template-columns: 1fr 1fr; }
+  /* flex centering (instead of grid) so an auto column can't grow past the screen */
+  .modal { padding: 12px; display: flex; align-items: center; justify-content: center; }
+  .modal__dialog { width: 100%; }
+  .modal__body { padding: 18px 16px; }
+  /* never let a select's longest option blow the modal past the screen */
+  .modal__body .select, .modal__body .input { min-width: 0; max-width: 100%; }
+  .row { gap: 10px; }
+}

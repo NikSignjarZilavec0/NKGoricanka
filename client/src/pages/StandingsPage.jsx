@@ -59,7 +59,8 @@ export default function StandingsPage() {
                       <tr>
                         <th className="standings__pos">#</th>
                         <th className="standings__team">Ekipa</th>
-                        <th>T</th><th>Z</th><th>N</th><th>P</th>
+                        <th>T</th>
+                        <th className="col-hide-sm">Z</th><th className="col-hide-sm">N</th><th className="col-hide-sm">P</th>
                         <th className="standings__gd">Goli</th>
                         <th className="standings__pts">Tč.</th>
                         <th className="standings__tr"></th>
@@ -77,7 +78,8 @@ export default function StandingsPage() {
                               </span>
                               {r.team}
                             </td>
-                            <td>{r.played}</td><td>{r.won}</td><td>{r.drawn}</td><td>{r.lost}</td>
+                            <td>{r.played}</td>
+                            <td className="col-hide-sm">{r.won}</td><td className="col-hide-sm">{r.drawn}</td><td className="col-hide-sm">{r.lost}</td>
                             <td className="standings__gd">{r.goalsFor}:{r.goalsAgainst}</td>
                             <td className="standings__pts">{r.points}</td>
                             <td className="standings__tr">{trendMark(r.trend)}</td>

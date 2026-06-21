@@ -257,7 +257,7 @@ export default function AdminMatches() {
               <h4 className="admin-form-section">Strelci (goli) <button type="button" className="btn btn--outline btn--sm" onClick={addScorer}>+ Dodaj gol</button></h4>
               {scorers.length === 0 && <p className="text-muted">Ni vnesenih golov.</p>}
               {scorers.map((s, i) => (
-                <div className="row scorer-row" key={i} style={{ flexWrap: 'nowrap', alignItems: 'center' }}>
+                <div className="row scorer-row ev-row" key={i} style={{ alignItems: 'center' }}>
                   <PlayerSelect players={players} value={s.playerId} onChange={(id) => patchScorer(i, { playerId: id, playerName: nameOf(id) })} style={{ flex: 2 }} placeholder="— strelec —" />
                   <input className="input" style={{ width: 70, flex: 'none' }} type="number" min="1" max="130" placeholder="min." value={s.minute} onChange={(e) => patchScorer(i, { minute: e.target.value })} />
                   <PlayerSelect players={players} value={s.assistPlayerId} onChange={(id) => patchScorer(i, { assistPlayerId: id, assistName: nameOf(id) })} style={{ flex: 2 }} placeholder="— asistenca (neobvezno) —" />
@@ -268,7 +268,7 @@ export default function AdminMatches() {
               <h4 className="admin-form-section">Kartoni <button type="button" className="btn btn--outline btn--sm" onClick={addCard}>+ Dodaj karton</button></h4>
               {cards.length === 0 && <p className="text-muted">Ni vnesenih kartonov.</p>}
               {cards.map((c, i) => (
-                <div className="row scorer-row" key={i} style={{ flexWrap: 'nowrap', alignItems: 'center' }}>
+                <div className="row scorer-row ev-row" key={i} style={{ alignItems: 'center' }}>
                   <PlayerSelect players={players} value={c.playerId} onChange={(id) => patchCard(i, { playerId: id, playerName: nameOf(id) })} style={{ flex: 2 }} placeholder="— igralec —" />
                   <select className="select" style={{ width: 120, flex: 'none' }} value={c.type} onChange={(e) => patchCard(i, { type: e.target.value })}>
                     <option value="yellow">Rumeni</option>
@@ -303,7 +303,7 @@ export default function AdminMatches() {
               <h4 className="admin-form-section">Zamenjave <button type="button" className="btn btn--outline btn--sm" onClick={addSub}>+ Dodaj zamenjavo</button></h4>
               {subs.length === 0 && <p className="text-muted">Ni vnesenih zamenjav.</p>}
               {subs.map((s, i) => (
-                <div className="row scorer-row" key={i} style={{ flexWrap: 'nowrap', alignItems: 'center' }}>
+                <div className="row scorer-row ev-row" key={i} style={{ alignItems: 'center' }}>
                   <span className="sub-arrow sub-arrow--in" title="vstopil">▲</span>
                   <PlayerSelect players={players} value={s.onPlayerId} onChange={(id) => patchSub(i, { onPlayerId: id, onName: nameOf(id) })} style={{ flex: 2 }} placeholder="— vstopil —" />
                   <span className="sub-arrow sub-arrow--out" title="zamenjal">▼</span>

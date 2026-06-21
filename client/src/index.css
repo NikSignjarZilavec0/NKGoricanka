@@ -22,6 +22,9 @@
   --gold: #ffd42e;
   --gold-deep: #e6b007;
 
+  /* Assist accent (blue, so it never clashes with the yellow card) */
+  --assist: #3b82f6;
+
   /* Text (light, on the dark theme) */
   --ink: #f8eef0;
   --ink-soft: #e0cace;

@@ -169,12 +169,12 @@
 .pmatch__ev { flex: none; display: flex; align-items: center; gap: 5px; }
 .pmatch__badge { display: inline-flex; align-items: center; gap: 2px; font-size: 0.7rem; font-weight: 800; padding: 1px 6px; border-radius: 7px; }
 .pmatch__badge--g { background: #fff; color: #1a0408; }
-.pmatch__badge--a { background: var(--gold); color: #1a0408; }
+.pmatch__badge--a { background: var(--assist); color: #fff; }
 .pmatch__badge--sub { background: rgba(255, 255, 255, 0.12); color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.62rem; }
 .pmatch__ev .kard { width: 11px; height: 15px; }
 .pev-icon { display: inline-flex; align-items: center; }
 .pev-icon--g { color: var(--ink); }
-.pev-icon--a { width: 16px; height: 16px; border-radius: 50%; background: var(--gold); color: #1a0408; font-size: 0.6rem; font-weight: 900; display: inline-grid; place-items: center; }
+.pev-icon--a { width: 16px; height: 16px; border-radius: 50%; background: var(--assist); color: #fff; font-size: 0.6rem; font-weight: 900; display: inline-grid; place-items: center; }
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 14px; }
 .stat-box { text-align: center; padding: 20px 16px; }
 .stat-box strong { display: block; font-size: 2.1rem; font-weight: 800; line-height: 1; background: linear-gradient(135deg, var(--red-300), var(--gold)); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -531,7 +531,7 @@
 .kader-icons { display: flex; align-items: center; gap: 13px; flex: none; }
 .kader-ic { display: inline-flex; align-items: center; gap: 3px; font-weight: 800; font-size: 0.84rem; color: var(--ink-soft); }
 .kader-ic svg { color: var(--ink); }
-.kader-ic--a .kader-ic__a { width: 17px; height: 17px; border-radius: 50%; background: var(--gold); color: #1a0408; font-size: 0.64rem; font-weight: 900; display: inline-grid; place-items: center; }
+.kader-ic--a .kader-ic__a { width: 17px; height: 17px; border-radius: 50%; background: var(--assist); color: #fff; font-size: 0.64rem; font-weight: 900; display: inline-grid; place-items: center; }
 .kader-icons .kard { width: 12px; height: 16px; }
 
 /* ----------------------------- Standings -------------------------------- */
@@ -646,7 +646,7 @@
 .pitch-player__events { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); display: flex; gap: 3px; align-items: center; z-index: 2; }
 .pev { display: inline-flex; align-items: center; gap: 1px; font-size: 0.62rem; font-weight: 800; padding: 1px 5px; border-radius: 8px; background: #fff; color: #1a0408; border: 1px solid rgba(0, 0, 0, 0.15); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35); }
 .pev svg { width: 12px; height: 12px; }
-.pev--assist { background: var(--gold); }
+.pev--assist { background: var(--assist); color: #fff; }
 .pitch-player__events .kard { width: 11px; height: 15px; border: 1px solid rgba(0, 0, 0, 0.2); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35); }
 
 /* Lineup editor */
